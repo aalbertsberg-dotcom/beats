@@ -14,212 +14,66 @@
     --border: #222233;
     --accent: #ff3c00;
     --accent2: #ff8c00;
-    --glow: rgba(255, 60, 0, 0.3);
+    --glow: rgba(255,60,0,0.3);
     --text: #e8e8f0;
     --muted: #9999cc;
     --mono: 'Share Tech Mono', monospace;
-    --display: 'Rajdhani', sans-serif;
   }
-  html, body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--display);
-    overflow: hidden;
-  }
-  body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 12px;
-  }
+  html, body { height:100%; background:var(--bg); color:var(--text); overflow:hidden; }
+  body { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:12px; }
   .shell {
-    width: 100%;
-    max-width: 320px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 24px 20px 20px;
-    position: relative;
-    box-shadow:
-      0 0 0 1px rgba(255,60,0,0.06),
-      0 8px 40px rgba(0,0,0,0.6),
-      inset 0 1px 0 rgba(255,255,255,0.04);
+    width:100%; max-width:320px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:4px;
+    padding:24px 20px 20px;
+    box-shadow: 0 0 0 1px rgba(255,60,0,0.06), 0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
   }
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 18px;
-  }
-  .brand {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-  .live-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 6px var(--accent);
-    animation: pulse 1.4s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%,100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.7); }
-  }
+  .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+  .brand { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
+  .live-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 6px var(--accent); animation:pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+
   .dial-wrap {
-    position: relative;
-    width: 190px;
-    height: 190px;
-    margin: 0 auto 16px;
-    user-select: none;
-    cursor: grab;
+    position:relative; width:190px; height:190px;
+    margin:0 auto 16px;
+    user-select:none; cursor:crosshair;
   }
-  .dial-svg {
-    width: 100%; height: 100%;
-    transform: rotate(-90deg);
-    overflow: visible;
-  }
-  .track { fill: none; stroke: var(--border); stroke-width: 6; }
-  .progress {
-    fill: none;
-    stroke: url(#arcGrad);
-    stroke-width: 6;
-    stroke-linecap: round;
-    transition: stroke-dashoffset 0.9s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+  .dial-svg { width:100%; height:100%; transform:rotate(-90deg); overflow:visible; }
+  .track { fill:none; stroke:var(--border); stroke-width:6; }
+  .progress { fill:none; stroke:url(#arcGrad); stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1); }
+
   .center-readout {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    pointer-events: none;
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    pointer-events:none;
   }
-  .beat-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-  .beat-value {
-    font-family: var(--mono);
-    font-size: 42px;
-    font-weight: 400;
-    color: var(--text);
-    letter-spacing: -1px;
-    line-height: 1;
-    text-shadow: 0 0 20px var(--glow);
-    transition: color 0.3s;
-  }
-  .beat-value.tick { color: var(--accent); }
-  .beat-frac {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 1px;
-  }
-  .converter {
-    display: none;
-    background: rgba(255,140,0,0.07);
-    border: 1px solid rgba(255,140,0,0.35);
-    border-radius: 3px;
-    padding: 8px 12px;
-    text-align: center;
-    margin-bottom: 12px;
-  }
-  .converter.active { display: block; }
-  .conv-label {
-    font-family: var(--mono);
-    font-size: 8px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-  .conv-result {
-    font-family: var(--mono);
-    font-size: 20px;
-    color: #ff8c00;
-    letter-spacing: 1px;
-  }
-  .stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  .stat {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 8px 6px;
-    text-align: center;
-  }
-  .stat-val {
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--text);
-    line-height: 1;
-    margin-bottom: 3px;
-  }
-  .stat-lbl {
-    font-size: 9px;
-    letter-spacing: 1.5px;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-  .bar-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .bar-track {
-    flex: 1;
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border-radius: 2px;
-    transition: width 0.9s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 0 6px var(--glow);
-  }
-  .bar-pct {
-    font-family: var(--mono);
-    font-size: 9px;
-    color: var(--muted);
-    width: 32px;
-    text-align: right;
-    flex-shrink: 0;
-  }
-  .footer {
-    margin-top: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .footer-note, .bmt-label {
-    font-family: var(--mono);
-    font-size: 8px;
-    color: var(--muted);
-    letter-spacing: 1.5px;
-  }
+  .beat-label { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
+  .beat-value { font-family:var(--mono); font-size:42px; font-weight:400; color:var(--text); letter-spacing:-1px; line-height:1; text-shadow:0 0 20px var(--glow); transition:color 0.3s; }
+  .beat-value.tick { color:var(--accent); }
+  .beat-frac { font-family:var(--mono); font-size:11px; color:var(--muted); letter-spacing:1px; }
+
+  /* 2x2 stats grid — always same size */
+  .stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
+  .stat { background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:3px; padding:8px 6px; text-align:center; }
+  .stat.conv-stat { border-color:rgba(255,140,0,0.2); }
+  .stat.conv-stat.active { border-color:rgba(255,140,0,0.5); background:rgba(255,140,0,0.07); }
+  .stat-val { font-family:var(--mono); font-size:13px; color:var(--text); line-height:1; margin-bottom:3px; }
+  .stat.conv-stat .stat-val { color:var(--muted); }
+  .stat.conv-stat.active .stat-val { color:#ff8c00; }
+  .stat-lbl { font-size:9px; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; }
+
+  .bar-row { display:flex; align-items:center; gap:8px; }
+  .bar-track { flex:1; height:3px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .bar-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:2px; transition:width 0.9s cubic-bezier(0.4,0,0.2,1); box-shadow:0 0 6px var(--glow); }
+  .bar-pct { font-family:var(--mono); font-size:9px; color:var(--muted); width:32px; text-align:right; flex-shrink:0; }
+
+  .footer { margin-top:12px; display:flex; justify-content:space-between; align-items:center; }
+  .footer-note, .bmt-label { font-family:var(--mono); font-size:8px; color:var(--muted); letter-spacing:1.5px; }
 </style>
 </head>
 <body>
 <div class="shell">
-
   <div class="topbar">
     <span class="brand">Internet Time</span>
     <div class="live-dot"></div>
@@ -235,17 +89,14 @@
       </defs>
       <g id="ticks"></g>
       <circle class="track" cx="95" cy="95" r="80"/>
-      <circle class="progress" id="arc" cx="95" cy="95" r="80"
-        stroke-dasharray="502.65" stroke-dashoffset="502.65"/>
-      <!-- Invisible wide grab ring so you can drag anywhere on the circle -->
-      <circle id="grabTrack" cx="95" cy="95" r="80"
-        fill="none" stroke="transparent" stroke-width="24" style="cursor:grab"/>
-      <!-- Draggable handle dot -->
+      <circle class="progress" id="arc" cx="95" cy="95" r="80" stroke-dasharray="502.65" stroke-dashoffset="502.65"/>
+      <!-- Full-circle invisible hit area -->
+      <circle cx="95" cy="95" r="95" fill="transparent"/>
+      <!-- Handle -->
       <circle id="handle" cx="95" cy="15" r="7"
         fill="#ff8c00" stroke="#0a0a0f" stroke-width="2"
-        style="cursor:grab;filter:drop-shadow(0 0 5px rgba(255,140,0,0.9))"/>
+        style="filter:drop-shadow(0 0 5px rgba(255,140,0,0.9))"/>
     </svg>
-
     <div class="center-readout">
       <span class="beat-label" id="centerLabel">@ beats</span>
       <span class="beat-value" id="beatNum">000</span>
@@ -253,11 +104,7 @@
     </div>
   </div>
 
-  <div class="converter" id="converter">
-    <div class="conv-label">beat → local time</div>
-    <div class="conv-result" id="convResult">@000 = 12:00am</div>
-  </div>
-
+  <!-- 2x2 grid: always same footprint -->
   <div class="stats">
     <div class="stat">
       <div class="stat-val" id="statRemain">1000</div>
@@ -271,150 +118,142 @@
       <div class="stat-val" id="statLocal">--:--</div>
       <div class="stat-lbl">Local</div>
     </div>
+    <div class="stat conv-stat" id="convStat">
+      <div class="stat-val" id="convVal">--:--</div>
+      <div class="stat-lbl" id="convLbl">@ ?</div>
+    </div>
   </div>
 
   <div class="bar-row">
-    <div class="bar-track">
-      <div class="bar-fill" id="barFill" style="width:0%"></div>
-    </div>
+    <div class="bar-track"><div class="bar-fill" id="barFill" style="width:0%"></div></div>
     <span class="bar-pct" id="barPct">0.0%</span>
   </div>
 
   <div class="footer">
-    <span class="footer-note">drag dial to convert</span>
+    <span class="footer-note">click dial to convert</span>
     <span class="bmt-label">UTC+1 BMT</span>
   </div>
-
 </div>
+
 <script>
   const CX = 95, CY = 95, R = 80;
   const circumference = 2 * Math.PI * R;
 
-  // Build tick marks
+  // Tick marks
   (function() {
     const g = document.getElementById('ticks');
     for (let i = 0; i < 10; i++) {
-      const angle = (i / 10) * 2 * Math.PI - Math.PI / 2;
-      const x1 = CX + (R - 10) * Math.cos(angle);
-      const y1 = CY + (R - 10) * Math.sin(angle);
-      const x2 = CX + (R + 2) * Math.cos(angle);
-      const y2 = CY + (R + 2) * Math.sin(angle);
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', x1); line.setAttribute('y1', y1);
-      line.setAttribute('x2', x2); line.setAttribute('y2', y2);
-      line.setAttribute('stroke', '#333355');
-      line.setAttribute('stroke-width', i === 0 ? '2' : '1');
-      line.setAttribute('stroke-linecap', 'round');
-      g.appendChild(line);
-      const lx = CX + (R - 22) * Math.cos(angle);
-      const ly = CY + (R - 22) * Math.sin(angle);
-      const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      txt.setAttribute('x', lx); txt.setAttribute('y', ly);
-      txt.setAttribute('text-anchor', 'middle');
-      txt.setAttribute('dominant-baseline', 'central');
-      txt.setAttribute('fill', '#8888bb');
-      txt.setAttribute('font-size', '7');
-      txt.setAttribute('font-family', 'Share Tech Mono, monospace');
-      txt.setAttribute('transform', `rotate(90, ${lx}, ${ly})`);
-      txt.textContent = (i * 100).toString().padStart(3, '0');
-      g.appendChild(txt);
+      const a = (i / 10) * 2 * Math.PI - Math.PI / 2;
+      const mk = (inner, outer) => [CX + inner*Math.cos(a), CY + inner*Math.sin(a), CX + outer*Math.cos(a), CY + outer*Math.sin(a)];
+      const [x1,y1,x2,y2] = mk(R-10, R+2);
+      const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+      ln.setAttribute('x1',x1); ln.setAttribute('y1',y1);
+      ln.setAttribute('x2',x2); ln.setAttribute('y2',y2);
+      ln.setAttribute('stroke','#333355'); ln.setAttribute('stroke-width', i===0?'2':'1'); ln.setAttribute('stroke-linecap','round');
+      g.appendChild(ln);
+      const [lx,ly] = [CX+(R-22)*Math.cos(a), CY+(R-22)*Math.sin(a)];
+      const tx = document.createElementNS('http://www.w3.org/2000/svg','text');
+      tx.setAttribute('x',lx); tx.setAttribute('y',ly);
+      tx.setAttribute('text-anchor','middle'); tx.setAttribute('dominant-baseline','central');
+      tx.setAttribute('fill','#8888bb'); tx.setAttribute('font-size','7');
+      tx.setAttribute('font-family','Share Tech Mono, monospace');
+      tx.setAttribute('transform',`rotate(90,${lx},${ly})`);
+      tx.textContent = (i*100).toString().padStart(3,'0');
+      g.appendChild(tx);
     }
   })();
 
   const arc         = document.getElementById('arc');
   const handle      = document.getElementById('handle');
-  const grabTrack   = document.getElementById('grabTrack');
   const beatNum     = document.getElementById('beatNum');
   const beatFrac    = document.getElementById('beatFrac');
   const centerLabel = document.getElementById('centerLabel');
   const statRemain  = document.getElementById('statRemain');
   const barFill     = document.getElementById('barFill');
   const barPct      = document.getElementById('barPct');
-  const converter   = document.getElementById('converter');
-  const convResult  = document.getElementById('convResult');
+  const convStat    = document.getElementById('convStat');
+  const convVal     = document.getElementById('convVal');
+  const convLbl     = document.getElementById('convLbl');
   const dialSvg     = document.getElementById('dialSvg');
+  const dialWrap    = document.getElementById('dialWrap');
 
-  let lastBeat = -1;
-  let dragging = false;
+  let lastBeat = -1, dragging = false;
 
   function getBeats() {
     const now = new Date();
     const bmtMs = now.getTime() + (now.getTimezoneOffset() + 60) * 60000;
     const bmt = new Date(bmtMs);
-    const totalSec = bmt.getHours() * 3600 + bmt.getMinutes() * 60 + bmt.getSeconds() + bmt.getMilliseconds() / 1000;
-    return totalSec / 86.4;
+    return (bmt.getHours()*3600 + bmt.getMinutes()*60 + bmt.getSeconds() + bmt.getMilliseconds()/1000) / 86.4;
   }
 
-  function beatsToLocal(beatN) {
-    const bmtSec = beatN * 86.4;
-    const localOffsetSec = -new Date().getTimezoneOffset() * 60;
-    let localSec = bmtSec - 3600 + localOffsetSec;
-    localSec = ((localSec % 86400) + 86400) % 86400;
-    const totalMin = Math.floor(localSec / 60);
-    let h = Math.floor(totalMin / 60);
-    const m = (totalMin % 60).toString().padStart(2, '0');
-    const ampm = h >= 12 ? 'pm' : 'am';
+  function beatsToLocal(n) {
+    let s = n * 86.4 - 3600 + (-new Date().getTimezoneOffset() * 60);
+    s = ((s % 86400) + 86400) % 86400;
+    let h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60).toString().padStart(2,'0');
+    const ap = h >= 12 ? 'pm' : 'am';
     h = h % 12 || 12;
-    return h + ':' + m + ampm;
+    return h + ':' + m + ap;
   }
 
-  function placeHandle(beatN) {
-    const angle = (beatN / 1000) * 2 * Math.PI - Math.PI / 2;
-    handle.setAttribute('cx', CX + R * Math.cos(angle));
-    handle.setAttribute('cy', CY + R * Math.sin(angle));
+  function placeHandle(n) {
+    const a = (n / 1000) * 2 * Math.PI - Math.PI / 2;
+    handle.setAttribute('cx', CX + R * Math.cos(a));
+    handle.setAttribute('cy', CY + R * Math.sin(a));
   }
 
-  // Convert client coords to beat value, accounting for CSS rotate(-90deg) on SVG
+  // Use getScreenCTM to correctly map client coords → SVG coords
+  // regardless of CSS transforms, iframe offsets, etc.
   function clientToBeat(clientX, clientY) {
-    const rect = dialSvg.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dx = clientX - cx;
-    const dy = clientY - cy;
-    // Un-rotate by +90deg to get SVG coordinate space angle
-    // rotate+90: x' = y, y' = -x
-    const angle = Math.atan2(-dx, dy); // equivalent to atan2(unrotatedY, unrotatedX)
-    let beat = (angle + Math.PI / 2) / (2 * Math.PI) * 1000;
+    const pt = dialSvg.createSVGPoint();
+    pt.x = clientX; pt.y = clientY;
+    const svgPt = pt.matrixTransform(dialSvg.getScreenCTM().inverse());
+    const dx = svgPt.x - CX;
+    const dy = svgPt.y - CY;
+    // SVG is rotated -90deg visually; getScreenCTM accounts for that,
+    // so dx/dy are already in unrotated SVG space.
+    // Beat 0 = angle -PI/2 in SVG space (top of circle)
+    let a = Math.atan2(dy, dx);
+    let beat = (a + Math.PI / 2) / (2 * Math.PI) * 1000;
     if (beat < 0) beat += 1000;
     if (beat >= 1000) beat -= 1000;
     return beat;
   }
 
-  function startDrag(clientX, clientY) {
+  function startDrag(cx, cy) {
     dragging = true;
-    handle.style.cursor = 'grabbing';
-    grabTrack.style.cursor = 'grabbing';
-    converter.classList.add('active');
-    centerLabel.textContent = 'exploring';
+    dialWrap.style.cursor = 'grabbing';
+    centerLabel.textContent = 'explore';
     beatFrac.textContent = '';
-    updateDrag(clientX, clientY);
+    convStat.classList.add('active');
+    updateDrag(cx, cy);
   }
 
-  function updateDrag(clientX, clientY) {
+  function updateDrag(cx, cy) {
     if (!dragging) return;
-    const dragBeat = clientToBeat(clientX, clientY);
-    const whole = Math.floor(dragBeat);
-    placeHandle(dragBeat);
-    beatNum.textContent = whole.toString().padStart(3, '0');
-    convResult.textContent = '@' + whole.toString().padStart(3, '0') + ' = ' + beatsToLocal(whole);
+    const b = clientToBeat(cx, cy);
+    const w = Math.floor(b);
+    placeHandle(b);
+    beatNum.textContent = w.toString().padStart(3,'0');
+    convVal.textContent = beatsToLocal(w);
+    convLbl.textContent = '@' + w.toString().padStart(3,'0');
   }
 
   function endDrag() {
     if (!dragging) return;
     dragging = false;
-    handle.style.cursor = 'grab';
-    grabTrack.style.cursor = 'grab';
-    converter.classList.remove('active');
+    dialWrap.style.cursor = 'crosshair';
     centerLabel.textContent = '@ beats';
+    convStat.classList.remove('active');
+    convVal.textContent = '--:--';
+    convLbl.textContent = '@ ?';
   }
 
-  const dialWrap = document.getElementById('dialWrap');
   dialWrap.addEventListener('mousedown',  e => { e.preventDefault(); startDrag(e.clientX, e.clientY); });
   window.addEventListener('mousemove',    e => { if (dragging) updateDrag(e.clientX, e.clientY); });
   window.addEventListener('mouseup',      endDrag);
-
-  dialWrap.addEventListener('touchstart', e => { e.preventDefault(); startDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
-  window.addEventListener('touchmove',    e => { if (dragging) { e.preventDefault(); updateDrag(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: false });
+  dialWrap.addEventListener('touchstart', e => { e.preventDefault(); startDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+  window.addEventListener('touchmove',    e => { if (dragging) { e.preventDefault(); updateDrag(e.touches[0].clientX, e.touches[0].clientY); } }, {passive:false});
   window.addEventListener('touchend',     endDrag);
 
   function tick() {
@@ -427,21 +266,20 @@
     arc.style.strokeDashoffset = circumference * (1 - beats / 1000);
     placeHandle(beats);
 
-    const display = whole.toString().padStart(3, '0');
     if (whole !== lastBeat) {
       beatNum.classList.add('tick');
       setTimeout(() => beatNum.classList.remove('tick'), 300);
       lastBeat = whole;
     }
-    beatNum.textContent = display;
-    beatFrac.textContent = '.' + Math.floor(frac * 100).toString().padStart(2, '0');
-    statRemain.textContent = (999 - whole).toString().padStart(3, '0');
+    beatNum.textContent = whole.toString().padStart(3,'0');
+    beatFrac.textContent = '.' + Math.floor(frac * 100).toString().padStart(2,'0');
+    statRemain.textContent = (999 - whole).toString().padStart(3,'0');
 
     let h = now.getHours();
-    const m = now.getMinutes().toString().padStart(2, '0');
-    const ampm = h >= 12 ? 'p' : 'a';
+    const m = now.getMinutes().toString().padStart(2,'0');
+    const ap = h >= 12 ? 'p' : 'a';
     h = h % 12 || 12;
-    document.getElementById('statLocal').textContent = h + ':' + m + ampm;
+    document.getElementById('statLocal').textContent = h + ':' + m + ap;
 
     const pct = (beats / 1000) * 100;
     barFill.style.width = pct.toFixed(2) + '%';
