@@ -77,6 +77,7 @@
     height: 190px;
     margin: 0 auto 16px;
     user-select: none;
+    cursor: grab;
   }
   .dial-svg {
     width: 100%; height: 100%;
@@ -407,15 +408,14 @@
     centerLabel.textContent = '@ beats';
   }
 
-  handle.addEventListener('mousedown',    e => { e.preventDefault(); startDrag(e.clientX, e.clientY); });
-  grabTrack.addEventListener('mousedown', e => { e.preventDefault(); startDrag(e.clientX, e.clientY); });
+  const dialWrap = document.getElementById('dialWrap');
+  dialWrap.addEventListener('mousedown',  e => { e.preventDefault(); startDrag(e.clientX, e.clientY); });
   window.addEventListener('mousemove',    e => { if (dragging) updateDrag(e.clientX, e.clientY); });
   window.addEventListener('mouseup',      endDrag);
 
-  handle.addEventListener('touchstart',    e => { e.preventDefault(); startDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
-  grabTrack.addEventListener('touchstart', e => { e.preventDefault(); startDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
-  window.addEventListener('touchmove',     e => { if (dragging) { e.preventDefault(); updateDrag(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: false });
-  window.addEventListener('touchend',      endDrag);
+  dialWrap.addEventListener('touchstart', e => { e.preventDefault(); startDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+  window.addEventListener('touchmove',    e => { if (dragging) { e.preventDefault(); updateDrag(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: false });
+  window.addEventListener('touchend',     endDrag);
 
   function tick() {
     if (dragging) return;
