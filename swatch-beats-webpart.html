@@ -355,9 +355,11 @@
 
     statRemain.textContent = (999 - whole).toString().padStart(3, '0');
 
-    const h = now.getHours().toString().padStart(2, '0');
+    let h = now.getHours();
     const m = now.getMinutes().toString().padStart(2, '0');
-    document.getElementById('statLocal').textContent = h + ':' + m;
+    const ampm = h >= 12 ? 'p' : 'a';
+    h = h % 12 || 12;
+    document.getElementById('statLocal').textContent = h + ':' + m + ampm;
 
     const pct = (beats / 1000) * 100;
     barFill.style.width = pct.toFixed(2) + '%';
