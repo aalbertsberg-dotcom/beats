@@ -41,6 +41,7 @@
   }
   .dial-svg { width:100%; height:100%; transform:rotate(-90deg); overflow:visible; }
   .dial-svg:hover { cursor:grab; }
+  body.is-dragging, body.is-dragging * { cursor:grabbing !important; }
   .track { fill:none; stroke:var(--border); stroke-width:6; }
   .progress { fill:none; stroke:url(#arcGrad); stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1); }
 
@@ -223,8 +224,8 @@
 
   function startDrag(cx, cy) {
     dragging = true;
-    dialWrap.style.cursor = 'grabbing';
-    document.body.style.cursor = 'grabbing';
+    dialWrap.style.cursor = '';
+    document.body.classList.add('is-dragging');
     centerLabel.textContent = 'explore';
     beatFrac.textContent = '';
     convStat.classList.add('active');
@@ -245,6 +246,7 @@
     if (!dragging) return;
     dragging = false;
     dialWrap.style.cursor = 'default';
+    document.body.classList.remove('is-dragging');
     document.body.style.cursor = '';
     centerLabel.textContent = '@ beats';
     convStat.classList.remove('active');
