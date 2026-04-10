@@ -272,10 +272,10 @@
     convLbl.textContent = '@ ?';
   }
 
-  dialWrap.addEventListener('mousedown',  e => { e.preventDefault(); if (locked) resetConv(); startDrag(e.clientX, e.clientY); });
+  dialWrap.addEventListener('mousedown',  e => { e.preventDefault(); if (locked) { resetConv(); return; } startDrag(e.clientX, e.clientY); });
   window.addEventListener('mousemove',    e => { if (dragging) updateDrag(e.clientX, e.clientY); });
   window.addEventListener('mouseup',      endDrag);
-  dialWrap.addEventListener('touchstart', e => { e.preventDefault(); if (locked) resetConv(); startDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+  dialWrap.addEventListener('touchstart', e => { e.preventDefault(); if (locked) { resetConv(); return; } startDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
   window.addEventListener('touchmove',    e => { if (dragging) { e.preventDefault(); updateDrag(e.touches[0].clientX, e.touches[0].clientY); } }, {passive:false});
   window.addEventListener('touchend',     endDrag);
 
