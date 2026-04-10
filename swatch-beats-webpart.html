@@ -57,25 +57,6 @@
   .beat-frac { font-family:var(--mono); font-size:11px; color:var(--muted); letter-spacing:1px; }
   .beat-date { font-family:var(--mono); font-size:8px; color:var(--muted); letter-spacing:2px; margin-top:3px; opacity:0.7; }
 
-  /* share button inside conv-stat */
-  .share-btn {
-    display:none;
-    margin-top:5px;
-    font-family:var(--mono);
-    font-size:8px;
-    letter-spacing:1.5px;
-    color:#ff8c00;
-    background:rgba(255,140,0,0.15);
-    border:1px solid rgba(255,140,0,0.4);
-    border-radius:2px;
-    padding:3px 8px;
-    cursor:pointer;
-    text-transform:uppercase;
-    transition:background 0.2s;
-  }
-  .share-btn:hover { background:rgba(255,140,0,0.3); }
-  .share-btn.copied { color:#00ffaa; border-color:rgba(0,255,170,0.4); background:rgba(0,255,170,0.1); }
-  .conv-stat.active .share-btn { display:inline-block; }
 
   /* 2x2 stats grid — always same size */
   .stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
@@ -146,7 +127,6 @@
     <div class="stat conv-stat" id="convStat">
       <div class="stat-val" id="convVal">--:--</div>
       <div class="stat-lbl" id="convLbl">@ ?</div>
-      <button class="share-btn" id="shareBtn">copy</button>
     </div>
   </div>
 
@@ -200,8 +180,6 @@
   const convStat    = document.getElementById('convStat');
   const convVal     = document.getElementById('convVal');
   const convLbl     = document.getElementById('convLbl');
-  const shareBtn    = document.getElementById('shareBtn');
-  const beatDate    = document.getElementById('beatDate');
   const dialSvg     = document.getElementById('dialSvg');
   const dialWrap    = document.getElementById('dialWrap');
 
@@ -292,37 +270,7 @@
     convStat.classList.remove('active');
     convVal.textContent = '--:--';
     convLbl.textContent = '@ ?';
-    shareBtn.textContent = 'copy';
-    shareBtn.classList.remove('copied');
   }
-
-  shareBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    const local = beatsToLocal(dragBeatWhole);
-    const msg = `Meet me at @${dragBeatWhole.toString().padStart(3,'0')} (${local} your time)`;
-    // Try modern clipboard API first, fall back to execCommand for iframes
-    const doFallback = () => {
-      const ta = document.createElement('textarea');
-      ta.value = msg;
-      ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
-      document.body.appendChild(ta);
-      ta.focus(); ta.select();
-      try { document.execCommand('copy'); } catch(e) {}
-      document.body.removeChild(ta);
-      shareBtn.textContent = 'copied!';
-      shareBtn.classList.add('copied');
-      setTimeout(() => { shareBtn.textContent = 'copy'; shareBtn.classList.remove('copied'); }, 2000);
-    };
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(msg).then(() => {
-        shareBtn.textContent = 'copied!';
-        shareBtn.classList.add('copied');
-        setTimeout(() => { shareBtn.textContent = 'copy'; shareBtn.classList.remove('copied'); }, 2000);
-      }).catch(doFallback);
-    } else {
-      doFallback();
-    }
-  });
 
   dialWrap.addEventListener('mousedown',  e => { e.preventDefault(); if (locked) resetConv(); startDrag(e.clientX, e.clientY); });
   window.addEventListener('mousemove',    e => { if (dragging) updateDrag(e.clientX, e.clientY); });
