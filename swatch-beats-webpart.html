@@ -183,7 +183,7 @@
   const dialSvg     = document.getElementById('dialSvg');
   const dialWrap    = document.getElementById('dialWrap');
 
-  let lastBeat = -1, dragging = false, locked = false, dragBeatWhole = 0;
+  let lastBeat = -1, dragging = false, dragBeatWhole = 0, resetTimer = null;
 
   const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   function getInternetDate() {
@@ -233,7 +233,7 @@
   }
 
   function startDrag(cx, cy) {
-    locked = false;
+    if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
     dragging = true;
     dialWrap.style.cursor = '';
     document.body.classList.add('is-dragging');
@@ -254,28 +254,26 @@
     convLbl.textContent = '@' + w.toString().padStart(3,'0');
   }
 
-  function endDrag() {
-    if (!dragging) return;
-    dragging = false;
-    locked = true;
-    dialWrap.style.cursor = 'default';
-    document.body.classList.remove('is-dragging');
-    document.body.style.cursor = '';
-    // leave conv stat visible so user can click copy
-  }
-
   function resetConv() {
-    locked = false;
     centerLabel.textContent = '@ beats';
     convStat.classList.remove('active');
     convVal.textContent = '--:--';
     convLbl.textContent = '@ ?';
   }
 
-  dialWrap.addEventListener('mousedown',  e => { e.preventDefault(); if (locked) { resetConv(); return; } startDrag(e.clientX, e.clientY); });
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    dialWrap.style.cursor = 'default';
+    document.body.classList.remove('is-dragging');
+    document.body.style.cursor = '';
+    resetTimer = setTimeout(resetConv, 4000);
+  }
+
+  dialWrap.addEventListener('mousedown',  e => { e.preventDefault(); startDrag(e.clientX, e.clientY); });
   window.addEventListener('mousemove',    e => { if (dragging) updateDrag(e.clientX, e.clientY); });
   window.addEventListener('mouseup',      endDrag);
-  dialWrap.addEventListener('touchstart', e => { e.preventDefault(); if (locked) { resetConv(); return; } startDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+  dialWrap.addEventListener('touchstart', e => { e.preventDefault(); startDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
   window.addEventListener('touchmove',    e => { if (dragging) { e.preventDefault(); updateDrag(e.touches[0].clientX, e.touches[0].clientY); } }, {passive:false});
   window.addEventListener('touchend',     endDrag);
 
@@ -287,9 +285,9 @@
     const frac = beats - whole;
 
     arc.style.strokeDashoffset = circumference * (1 - beats / 1000);
-    if (!locked) placeHandle(beats);
+    if (!dragging) placeHandle(beats);
 
-    if (!locked) {
+    if (!dragging) {
       if (whole !== lastBeat) {
         beatNum.classList.add('tick');
         setTimeout(() => beatNum.classList.remove('tick'), 300);
@@ -299,7 +297,6 @@
       beatFrac.textContent = '.' + Math.floor(frac * 100).toString().padStart(2,'0');
       centerLabel.textContent = '@ beats';
     }
-
     statRemain.textContent = (999 - whole).toString().padStart(3,'0');
 
     let h = now.getHours();
