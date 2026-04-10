@@ -55,6 +55,27 @@
   .beat-value { font-family:var(--mono); font-size:42px; font-weight:400; color:var(--text); letter-spacing:-1px; line-height:1; text-shadow:0 0 20px var(--glow); transition:color 0.3s; }
   .beat-value.tick { color:var(--accent); }
   .beat-frac { font-family:var(--mono); font-size:11px; color:var(--muted); letter-spacing:1px; }
+  .beat-date { font-family:var(--mono); font-size:8px; color:var(--muted); letter-spacing:2px; margin-top:3px; opacity:0.7; }
+
+  /* share button inside conv-stat */
+  .share-btn {
+    display:none;
+    margin-top:5px;
+    font-family:var(--mono);
+    font-size:8px;
+    letter-spacing:1.5px;
+    color:#ff8c00;
+    background:rgba(255,140,0,0.15);
+    border:1px solid rgba(255,140,0,0.4);
+    border-radius:2px;
+    padding:3px 8px;
+    cursor:pointer;
+    text-transform:uppercase;
+    transition:background 0.2s;
+  }
+  .share-btn:hover { background:rgba(255,140,0,0.3); }
+  .share-btn.copied { color:#00ffaa; border-color:rgba(0,255,170,0.4); background:rgba(0,255,170,0.1); }
+  .conv-stat.active .share-btn { display:inline-block; }
 
   /* 2x2 stats grid — always same size */
   .stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
@@ -72,7 +93,8 @@
   .bar-pct { font-family:var(--mono); font-size:9px; color:var(--muted); width:32px; text-align:right; flex-shrink:0; }
 
   .footer { margin-top:12px; display:flex; justify-content:space-between; align-items:center; }
-  .footer-note, .bmt-label { font-family:var(--mono); font-size:8px; color:var(--muted); letter-spacing:1.5px; }
+  .footer-note { font-family:var(--mono); font-size:10px; color:var(--muted); letter-spacing:1.5px; }
+  .footer-date { font-family:var(--mono); font-size:11px; color:var(--text); letter-spacing:2px; }
 </style>
 </head>
 <body>
@@ -124,6 +146,7 @@
     <div class="stat conv-stat" id="convStat">
       <div class="stat-val" id="convVal">--:--</div>
       <div class="stat-lbl" id="convLbl">@ ?</div>
+      <button class="share-btn" id="shareBtn">copy</button>
     </div>
   </div>
 
@@ -133,8 +156,8 @@
   </div>
 
   <div class="footer">
+    <span class="footer-date" id="footerDate">--</span>
     <span class="footer-note">click dial to convert</span>
-    <span class="bmt-label">UTC+1 BMT</span>
   </div>
 </div>
 
@@ -177,10 +200,18 @@
   const convStat    = document.getElementById('convStat');
   const convVal     = document.getElementById('convVal');
   const convLbl     = document.getElementById('convLbl');
+  const shareBtn    = document.getElementById('shareBtn');
+  const beatDate    = document.getElementById('beatDate');
   const dialSvg     = document.getElementById('dialSvg');
   const dialWrap    = document.getElementById('dialWrap');
 
-  let lastBeat = -1, dragging = false;
+  let lastBeat = -1, dragging = false, locked = false, dragBeatWhole = 0;
+
+  const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  function getInternetDate() {
+    const now = new Date();
+    return now.getDate() + '.' + MONTHS[now.getMonth()] + '.' + now.getFullYear();
+  }
 
   function getBeats() {
     const now = new Date();
@@ -224,6 +255,7 @@
   }
 
   function startDrag(cx, cy) {
+    locked = false;
     dragging = true;
     dialWrap.style.cursor = '';
     document.body.classList.add('is-dragging');
@@ -237,6 +269,7 @@
     if (!dragging) return;
     const b = clientToBeat(cx, cy);
     const w = Math.floor(b);
+    dragBeatWhole = w;
     placeHandle(b);
     beatNum.textContent = w.toString().padStart(3,'0');
     convVal.textContent = beatsToLocal(w);
@@ -246,19 +279,38 @@
   function endDrag() {
     if (!dragging) return;
     dragging = false;
+    locked = true;
     dialWrap.style.cursor = 'default';
     document.body.classList.remove('is-dragging');
     document.body.style.cursor = '';
+    // leave conv stat visible so user can click copy
+  }
+
+  function resetConv() {
+    locked = false;
     centerLabel.textContent = '@ beats';
     convStat.classList.remove('active');
     convVal.textContent = '--:--';
     convLbl.textContent = '@ ?';
+    shareBtn.textContent = 'copy';
+    shareBtn.classList.remove('copied');
   }
 
-  dialWrap.addEventListener('mousedown',  e => { e.preventDefault(); startDrag(e.clientX, e.clientY); });
+  shareBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    const local = beatsToLocal(dragBeatWhole);
+    const msg = `Meet me at @${dragBeatWhole.toString().padStart(3,'0')} (${local} your time)`;
+    navigator.clipboard.writeText(msg).then(() => {
+      shareBtn.textContent = 'copied!';
+      shareBtn.classList.add('copied');
+      setTimeout(() => { shareBtn.textContent = 'copy'; shareBtn.classList.remove('copied'); }, 2000);
+    });
+  });
+
+  dialWrap.addEventListener('mousedown',  e => { e.preventDefault(); if (locked) resetConv(); startDrag(e.clientX, e.clientY); });
   window.addEventListener('mousemove',    e => { if (dragging) updateDrag(e.clientX, e.clientY); });
   window.addEventListener('mouseup',      endDrag);
-  dialWrap.addEventListener('touchstart', e => { e.preventDefault(); startDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+  dialWrap.addEventListener('touchstart', e => { e.preventDefault(); if (locked) resetConv(); startDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
   window.addEventListener('touchmove',    e => { if (dragging) { e.preventDefault(); updateDrag(e.touches[0].clientX, e.touches[0].clientY); } }, {passive:false});
   window.addEventListener('touchend',     endDrag);
 
@@ -270,15 +322,19 @@
     const frac = beats - whole;
 
     arc.style.strokeDashoffset = circumference * (1 - beats / 1000);
-    placeHandle(beats);
+    if (!locked) placeHandle(beats);
 
-    if (whole !== lastBeat) {
-      beatNum.classList.add('tick');
-      setTimeout(() => beatNum.classList.remove('tick'), 300);
-      lastBeat = whole;
+    if (!locked) {
+      if (whole !== lastBeat) {
+        beatNum.classList.add('tick');
+        setTimeout(() => beatNum.classList.remove('tick'), 300);
+        lastBeat = whole;
+      }
+      beatNum.textContent = whole.toString().padStart(3,'0');
+      beatFrac.textContent = '.' + Math.floor(frac * 100).toString().padStart(2,'0');
+      centerLabel.textContent = '@ beats';
     }
-    beatNum.textContent = whole.toString().padStart(3,'0');
-    beatFrac.textContent = '.' + Math.floor(frac * 100).toString().padStart(2,'0');
+
     statRemain.textContent = (999 - whole).toString().padStart(3,'0');
 
     let h = now.getHours();
@@ -286,6 +342,8 @@
     const ap = h >= 12 ? 'p' : 'a';
     h = h % 12 || 12;
     document.getElementById('statLocal').textContent = h + ':' + m + ap;
+
+    document.getElementById('footerDate').textContent = getInternetDate();
 
     const pct = (beats / 1000) * 100;
     barFill.style.width = pct.toFixed(2) + '%';
