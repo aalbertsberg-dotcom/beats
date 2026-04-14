@@ -267,7 +267,7 @@
     dialWrap.style.cursor = 'default';
     document.body.classList.remove('is-dragging');
     document.body.style.cursor = '';
-    resetTimer = setTimeout(resetConv, 4000);
+    resetTimer = setTimeout(resetConv, 5000);
   }
 
   dialWrap.addEventListener('mousedown',  e => { e.preventDefault(); startDrag(e.clientX, e.clientY); });
