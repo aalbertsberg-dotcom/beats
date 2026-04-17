@@ -7,187 +7,231 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕐</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
   :root {
-    --bg: #0a0a0f;
-    --card: #111118;
-    --border: #222233;
-    --accent: #ff3c00;
-    --accent2: #ff8c00;
-    --glow: rgba(255,60,0,0.3);
-    --text: #e8e8f0;
-    --muted: #9999cc;
-    --mono: 'Share Tech Mono', monospace;
+    --bg:      #071020;
+    --card:    #0a1628;
+    --border:  #1e3048;
+    --accent:  #c9a84c;
+    --accent2: #e8c96a;
+    --glow:    rgba(201,168,76,0.3);
+    --text:    #d4bc78;
+    --text2:   #e8dfc0;
+    --muted:   #4a6a8a;
+    --mono:    'Share Tech Mono', monospace;
     --display: 'Rajdhani', sans-serif;
   }
-  html, body { height:100%; background:var(--bg); color:var(--text); overflow:hidden; }
-  body { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:12px; }
-  .wrap { display:flex; flex-direction:column; align-items:center; width:100%; max-width:320px; }
-  .shell {
-    width:100%;
+  html, body { height:100%; background:var(--bg); color:var(--text2); overflow:hidden; }
+  body { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:10px; }
+
+  /* outer layout: sidebar + column(banner + widget) */
+  .outer { display:flex; gap:6px; width:100%; max-width:380px; align-items:stretch; }
+
+  /* sidebar */
+  .sidebar {
     background:var(--card);
     border:1px solid var(--border);
     border-radius:4px;
-    padding:16px 20px 16px;
-    box-shadow: 0 0 0 1px rgba(255,60,0,0.06), 0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+    width:46px;
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:14px 0;
   }
-  .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-  .brand { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
-  .live-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 6px var(--accent); animation:pulse 1.4s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
-
-  .dial-wrap {
-    position:relative; width:170px; height:170px;
-    margin:0 auto 10px;
-    user-select:none; cursor:default;
+  .sidebar-wolf {
+    width:28px; height:28px;
   }
-  .dial-svg { width:100%; height:100%; transform:rotate(-90deg); overflow:visible; }
-  .dial-svg:hover { cursor:grab; }
-  body.is-dragging, body.is-dragging * { cursor:grabbing !important; }
-  .track { fill:none; stroke:var(--border); stroke-width:6; }
-  .progress { fill:none; stroke:url(#arcGrad); stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1); }
-
-  .center-readout {
-    position:absolute; inset:0;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-    pointer-events:none;
+  .sidebar-divider { width:20px; height:1px; background:var(--border); }
+  .sidebar-text {
+    font-family:var(--mono);
+    font-size:7px;
+    color:var(--accent);
+    letter-spacing:1.5px;
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+    text-transform:uppercase;
   }
-  .beat-label { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
-  .beat-value { font-family:var(--mono); font-size:42px; font-weight:400; color:var(--text); letter-spacing:-1px; line-height:1; text-shadow:0 0 20px var(--glow); transition:color 0.3s; }
-  .beat-value.tick { color:var(--accent); }
-  .beat-frac { font-family:var(--mono); font-size:11px; color:var(--muted); letter-spacing:1px; }
-  .beat-date { font-family:var(--mono); font-size:8px; color:var(--muted); letter-spacing:2px; margin-top:3px; opacity:0.7; }
+  .sidebar-sub {
+    font-family:var(--mono);
+    font-size:6px;
+    color:var(--muted);
+    letter-spacing:1.5px;
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+    text-transform:uppercase;
+  }
 
+  /* right column */
+  .col { display:flex; flex-direction:column; gap:6px; flex:1; min-width:0; }
 
-  /* 2x2 stats grid — always same size */
-  .stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
-  .stat { background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:3px; padding:6px 6px; text-align:center; }
-  .stat.conv-stat { border-color:rgba(255,140,0,0.2); }
-  .stat.conv-stat.active { border-color:rgba(255,140,0,0.5); background:rgba(255,140,0,0.07); }
-  .stat-val { font-family:var(--mono); font-size:15px; color:var(--text); line-height:1; margin-bottom:4px; }
-  .stat.conv-stat .stat-val { color:var(--muted); }
-  .stat.conv-stat.active .stat-val { color:#ff8c00; }
-  .stat-lbl { font-family:var(--display); font-size:11px; font-weight:600; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; }
-
-  .footer { margin-top:8px; display:flex; justify-content:space-between; align-items:center; }
-  .footer-note { font-family:var(--mono); font-size:10px; color:var(--muted); letter-spacing:1.5px; }
-  .footer-date { font-family:var(--mono); font-size:11px; color:var(--text); letter-spacing:2px; }
-
-  /* countdown banner */
+  /* banner */
   .banner {
-    width:100%; max-width:320px;
     background:var(--card);
     border:1px solid var(--border);
     border-radius:4px;
-    margin-bottom:8px;
-    padding:8px 16px;
+    padding:8px 14px;
     display:flex;
     justify-content:space-between;
     align-items:center;
-    box-shadow: 0 0 0 1px rgba(255,60,0,0.06), 0 4px 20px rgba(0,0,0,0.4);
   }
   .countdown-item { text-align:center; flex:1; }
-  .countdown-emoji { font-size:16px; line-height:1; margin-bottom:3px; }
-  .countdown-beats { font-family:var(--mono); font-size:13px; color:#ff8c00; letter-spacing:1px; line-height:1; margin-bottom:2px; }
-  .countdown-label { font-family:var(--display); font-size:10px; font-weight:600; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; }
-  .countdown-divider { width:1px; height:36px; background:var(--border); flex-shrink:0; margin:0 8px; }
+  .countdown-emoji { font-size:14px; line-height:1; margin-bottom:2px; }
+  .countdown-beats { font-family:var(--mono); font-size:12px; color:var(--accent); letter-spacing:1px; line-height:1; margin-bottom:2px; }
+  .countdown-label { font-family:var(--display); font-size:9px; font-weight:600; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; }
+  .countdown-divider { width:1px; height:32px; background:var(--border); flex-shrink:0; margin:0 8px; }
+
+  /* widget shell */
+  .shell {
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:4px;
+    padding:14px 16px 12px;
+  }
+  .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .brand { font-family:var(--mono); font-size:8px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
+  .live-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 6px var(--accent); animation:pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+
+  .dial-wrap { position:relative; width:160px; height:160px; margin:0 auto 10px; user-select:none; cursor:default; }
+  .dial-svg { width:100%; height:100%; transform:rotate(-90deg); overflow:visible; }
+  .dial-svg:hover { cursor:grab; }
+  body.is-dragging, body.is-dragging * { cursor:grabbing !important; }
+  .track { fill:none; stroke:var(--border); stroke-width:5; }
+  .progress { fill:none; stroke:url(#arcGrad); stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1); }
+
+  .center-readout { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; pointer-events:none; }
+  .beat-label { font-family:var(--mono); font-size:8px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
+  .beat-value { font-family:var(--mono); font-size:38px; font-weight:400; color:var(--text2); letter-spacing:-1px; line-height:1; text-shadow:0 0 16px var(--glow); transition:color 0.3s; }
+  .beat-value.tick { color:var(--accent2); }
+  .beat-frac { font-family:var(--mono); font-size:10px; color:var(--muted); letter-spacing:1px; }
+
+  .stats { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:8px; }
+  .stat { background:rgba(201,168,76,0.04); border:1px solid var(--border); border-radius:3px; padding:5px 6px; text-align:center; }
+  .stat.conv-stat { border-color:rgba(201,168,76,0.15); }
+  .stat.conv-stat.active { border-color:rgba(201,168,76,0.5); background:rgba(201,168,76,0.08); }
+  .stat-val { font-family:var(--mono); font-size:14px; color:var(--text); line-height:1; margin-bottom:3px; }
+  .stat.conv-stat .stat-val { color:var(--muted); }
+  .stat.conv-stat.active .stat-val { color:var(--accent2); }
+  .stat-lbl { font-family:var(--display); font-size:10px; font-weight:600; letter-spacing:1.5px; color:var(--muted); text-transform:uppercase; }
+
+  .footer { display:flex; justify-content:space-between; align-items:center; }
+  .footer-note { font-family:var(--mono); font-size:8px; color:var(--muted); letter-spacing:1.5px; }
+  .footer-date { font-family:var(--mono); font-size:10px; color:var(--accent); letter-spacing:2px; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="banner">
-    <div class="countdown-item">
-      <div class="countdown-emoji">🎃</div>
-      <div class="countdown-beats" id="halloweenBeats">---,---</div>
-      <div class="countdown-label">Halloween</div>
-    </div>
-    <div class="countdown-divider"></div>
-    <div class="countdown-item">
-      <div class="countdown-emoji">🎄</div>
-      <div class="countdown-beats" id="christmasBeats">---,---</div>
-      <div class="countdown-label">Christmas</div>
-    </div>
-  </div>
+<div class="outer">
 
-<div class="shell">
-  <div class="topbar">
-    <span class="brand">Internet Time</span>
-    <div class="live-dot"></div>
-  </div>
-
-  <div class="dial-wrap" id="dialWrap">
-    <svg class="dial-svg" id="dialSvg" viewBox="0 0 190 190" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style="stop-color:#ff3c00"/>
-          <stop offset="100%" style="stop-color:#ff8c00"/>
-        </linearGradient>
-      </defs>
-      <g id="ticks"></g>
-      <circle class="track" cx="95" cy="95" r="80"/>
-      <circle class="progress" id="arc" cx="95" cy="95" r="80" stroke-dasharray="502.65" stroke-dashoffset="502.65"/>
-      <!-- Full-circle invisible hit area -->
-      <circle cx="95" cy="95" r="95" fill="transparent"/>
-      <!-- Handle -->
-      <circle id="handle" cx="95" cy="15" r="7"
-        fill="#ff8c00" stroke="#0a0a0f" stroke-width="2"
-        style="filter:drop-shadow(0 0 5px rgba(255,140,0,0.9))"/>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <svg class="sidebar-wolf" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="50,8 58,32 84,32 63,49 71,73 50,57 29,73 37,49 16,32 42,32" fill="#c9a84c"/>
     </svg>
-    <div class="center-readout">
-      <span class="beat-label" id="centerLabel">@ beats</span>
-      <span class="beat-value" id="beatNum">000</span>
-      <span class="beat-frac" id="beatFrac">.00</span>
-    </div>
+    <div class="sidebar-divider"></div>
+    <span class="sidebar-text">Goldenwolf</span>
+    <div class="sidebar-divider"></div>
+    <span class="sidebar-sub">Standard</span>
   </div>
 
-  <!-- 2x2 grid: always same footprint -->
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-val" id="statRemain">1000</div>
-      <div class="stat-lbl">Remain</div>
-    </div>
-    <div class="stat">
-      <div class="stat-val">86.4s</div>
-      <div class="stat-lbl">/ Beat</div>
-    </div>
-    <div class="stat">
-      <div class="stat-val" id="statLocal">--:--</div>
-      <div class="stat-lbl">Local</div>
-    </div>
-    <div class="stat conv-stat" id="convStat">
-      <div class="stat-val" id="convVal">--:--</div>
-      <div class="stat-lbl" id="convLbl">@ ?</div>
-    </div>
-  </div>
+  <!-- Right column: banner + widget -->
+  <div class="col">
 
-  <div class="footer">
-    <span class="footer-date" id="footerDate">--</span>
-    <span class="footer-note">click dial to convert</span>
+    <!-- Countdown banner -->
+    <div class="banner">
+      <div class="countdown-item">
+        <div class="countdown-emoji">🎃</div>
+        <div class="countdown-beats" id="halloweenBeats">---,---</div>
+        <div class="countdown-label">Halloween</div>
+      </div>
+      <div class="countdown-divider"></div>
+      <div class="countdown-item">
+        <div class="countdown-emoji">🎄</div>
+        <div class="countdown-beats" id="christmasBeats">---,---</div>
+        <div class="countdown-label">Christmas</div>
+      </div>
+    </div>
+
+    <!-- Widget -->
+    <div class="shell">
+      <div class="topbar">
+        <span class="brand">Internet Time</span>
+        <div class="live-dot"></div>
+      </div>
+
+      <div class="dial-wrap" id="dialWrap">
+        <svg class="dial-svg" id="dialSvg" viewBox="0 0 190 190" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#8a5e0a"/>
+              <stop offset="100%" style="stop-color:#c9a84c"/>
+            </linearGradient>
+          </defs>
+          <g id="ticks"></g>
+          <circle class="track" cx="95" cy="95" r="80"/>
+          <circle class="progress" id="arc" cx="95" cy="95" r="80" stroke-dasharray="502.65" stroke-dashoffset="502.65"/>
+          <circle cx="95" cy="95" r="95" fill="transparent"/>
+          <circle id="handle" cx="95" cy="15" r="7"
+            fill="#c9a84c" stroke="#071020" stroke-width="2"
+            style="filter:drop-shadow(0 0 5px rgba(201,168,76,0.9))"/>
+        </svg>
+        <div class="center-readout">
+          <span class="beat-label" id="centerLabel">@ beats</span>
+          <span class="beat-value" id="beatNum">000</span>
+          <span class="beat-frac" id="beatFrac">.00</span>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-val" id="statRemain">1000</div>
+          <div class="stat-lbl">Remain</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">86.4s</div>
+          <div class="stat-lbl">/ Beat</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="statLocal">--:--</div>
+          <div class="stat-lbl">Local</div>
+        </div>
+        <div class="stat conv-stat" id="convStat">
+          <div class="stat-val" id="convVal">--:--</div>
+          <div class="stat-lbl" id="convLbl">@ ?</div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <span class="footer-date" id="footerDate">--</span>
+        <span class="footer-note">click dial to convert</span>
+      </div>
+    </div>
+
   </div>
-</div>
 </div>
 
 <script>
   const CX = 95, CY = 95, R = 80;
   const circumference = 2 * Math.PI * R;
 
-  // Tick marks
   (function() {
     const g = document.getElementById('ticks');
     for (let i = 0; i < 10; i++) {
       const a = (i / 10) * 2 * Math.PI - Math.PI / 2;
-      const mk = (inner, outer) => [CX + inner*Math.cos(a), CY + inner*Math.sin(a), CX + outer*Math.cos(a), CY + outer*Math.sin(a)];
+      const mk = (inner, outer) => [CX+inner*Math.cos(a), CY+inner*Math.sin(a), CX+outer*Math.cos(a), CY+outer*Math.sin(a)];
       const [x1,y1,x2,y2] = mk(R-10, R+2);
       const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
       ln.setAttribute('x1',x1); ln.setAttribute('y1',y1);
       ln.setAttribute('x2',x2); ln.setAttribute('y2',y2);
-      ln.setAttribute('stroke','#333355'); ln.setAttribute('stroke-width', i===0?'2':'1'); ln.setAttribute('stroke-linecap','round');
+      ln.setAttribute('stroke','#1e3048'); ln.setAttribute('stroke-width', i===0?'2':'1'); ln.setAttribute('stroke-linecap','round');
       g.appendChild(ln);
       const [lx,ly] = [CX+(R-22)*Math.cos(a), CY+(R-22)*Math.sin(a)];
       const tx = document.createElementNS('http://www.w3.org/2000/svg','text');
       tx.setAttribute('x',lx); tx.setAttribute('y',ly);
       tx.setAttribute('text-anchor','middle'); tx.setAttribute('dominant-baseline','central');
-      tx.setAttribute('fill','#aaaacc'); tx.setAttribute('font-size','8');
+      tx.setAttribute('fill','#2e5070'); tx.setAttribute('font-size','7');
       tx.setAttribute('font-family','Share Tech Mono, monospace');
       tx.setAttribute('transform',`rotate(90,${lx},${ly})`);
       tx.textContent = (i*100).toString().padStart(3,'0');
@@ -232,23 +276,29 @@
     return h + ':' + m + ap;
   }
 
+  function beatsUntil(month, day) {
+    const now = new Date();
+    let target = new Date(now.getFullYear(), month, day, 0, 0, 0, 0);
+    if (target <= now) target.setFullYear(target.getFullYear() + 1);
+    return Math.floor((target - now) / 86400000 * 1000).toLocaleString();
+  }
+
+  function updateCountdowns() {
+    document.getElementById('halloweenBeats').textContent = beatsUntil(9, 31) + ' @';
+    document.getElementById('christmasBeats').textContent = beatsUntil(11, 25) + ' @';
+  }
+
   function placeHandle(n) {
     const a = (n / 1000) * 2 * Math.PI - Math.PI / 2;
     handle.setAttribute('cx', CX + R * Math.cos(a));
     handle.setAttribute('cy', CY + R * Math.sin(a));
   }
 
-  // Use getScreenCTM to correctly map client coords → SVG coords
-  // regardless of CSS transforms, iframe offsets, etc.
   function clientToBeat(clientX, clientY) {
     const pt = dialSvg.createSVGPoint();
     pt.x = clientX; pt.y = clientY;
     const svgPt = pt.matrixTransform(dialSvg.getScreenCTM().inverse());
-    const dx = svgPt.x - CX;
-    const dy = svgPt.y - CY;
-    // SVG is rotated -90deg visually; getScreenCTM accounts for that,
-    // so dx/dy are already in unrotated SVG space.
-    // Beat 0 = angle -PI/2 in SVG space (top of circle)
+    const dx = svgPt.x - CX, dy = svgPt.y - CY;
     let a = Math.atan2(dy, dx);
     let beat = (a + Math.PI / 2) / (2 * Math.PI) * 1000;
     if (beat < 0) beat += 1000;
@@ -259,7 +309,6 @@
   function startDrag(cx, cy) {
     if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
     dragging = true;
-    dialWrap.style.cursor = '';
     document.body.classList.add('is-dragging');
     centerLabel.textContent = 'explore';
     beatFrac.textContent = '';
@@ -278,20 +327,6 @@
     convLbl.textContent = '@' + w.toString().padStart(3,'0');
   }
 
-  function beatsUntil(month, day) {
-    const now = new Date();
-    let target = new Date(now.getFullYear(), month, day, 0, 0, 0, 0);
-    if (target <= now) target.setFullYear(target.getFullYear() + 1);
-    const msLeft = target - now;
-    const beatsLeft = Math.floor(msLeft / 86400000 * 1000);
-    return beatsLeft.toLocaleString();
-  }
-
-  function updateCountdowns() {
-    document.getElementById('halloweenBeats').textContent = beatsUntil(9, 31) + ' @';
-    document.getElementById('christmasBeats').textContent = beatsUntil(11, 25) + ' @';
-  }
-
   function resetConv() {
     centerLabel.textContent = '@ beats';
     convStat.classList.remove('active');
@@ -302,7 +337,6 @@
   function endDrag() {
     if (!dragging) return;
     dragging = false;
-    dialWrap.style.cursor = 'default';
     document.body.classList.remove('is-dragging');
     document.body.style.cursor = '';
     resetTimer = setTimeout(resetConv, 5000);
@@ -323,18 +357,16 @@
     const frac = beats - whole;
 
     arc.style.strokeDashoffset = circumference * (1 - beats / 1000);
-    if (!dragging) placeHandle(beats);
+    placeHandle(beats);
 
-    if (!dragging) {
-      if (whole !== lastBeat) {
-        beatNum.classList.add('tick');
-        setTimeout(() => beatNum.classList.remove('tick'), 300);
-        lastBeat = whole;
-      }
-      beatNum.textContent = whole.toString().padStart(3,'0');
-      beatFrac.textContent = '.' + Math.floor(frac * 100).toString().padStart(2,'0');
-      centerLabel.textContent = '@ beats';
+    if (whole !== lastBeat) {
+      beatNum.classList.add('tick');
+      setTimeout(() => beatNum.classList.remove('tick'), 300);
+      lastBeat = whole;
     }
+    beatNum.textContent = whole.toString().padStart(3,'0');
+    beatFrac.textContent = '.' + Math.floor(frac * 100).toString().padStart(2,'0');
+    centerLabel.textContent = '@ beats';
     statRemain.textContent = (999 - whole).toString().padStart(3,'0');
 
     let h = now.getHours();
@@ -342,7 +374,6 @@
     const ap = h >= 12 ? 'p' : 'a';
     h = h % 12 || 12;
     document.getElementById('statLocal').textContent = h + ':' + m + ap;
-
     document.getElementById('footerDate').textContent = getInternetDate();
     updateCountdowns();
   }
