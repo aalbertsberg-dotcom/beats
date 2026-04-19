@@ -93,15 +93,37 @@
   }
   .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
   .brand { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
-  .live-logo { width:14px; height:14px; animation:pulse 1.4s ease-in-out infinite; filter:drop-shadow(0 0 3px #c9a84c); }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.35;transform:scale(0.75)} }
-  @keyframes glow-breathe {
-    0%,100% { filter:drop-shadow(0 0 3px rgba(212,169,58,0.4)) brightness(1); }
-    50%      { filter:drop-shadow(0 0 10px rgba(240,208,96,0.85)) brightness(1.25); }
+  /* beat-synced one-shot flash — triggered by JS class */
+  @keyframes beat-flash {
+    0%   { opacity:0.6; filter:drop-shadow(0 0 2px rgba(212,169,58,0.3)); transform:scale(1); }
+    35%  { opacity:1;   filter:drop-shadow(0 0 14px rgba(240,208,96,1)) drop-shadow(0 0 6px rgba(255,240,120,0.8)); transform:scale(1.5); }
+    100% { opacity:0.6; filter:drop-shadow(0 0 2px rgba(212,169,58,0.3)); transform:scale(1); }
   }
-  .sidebar-logo-glow { animation:glow-breathe 1.4s ease-in-out infinite; }
+  @keyframes logo-flash {
+    0%   { filter:drop-shadow(0 0 3px rgba(212,169,58,0.3)) brightness(1); }
+    30%  { filter:drop-shadow(0 0 14px rgba(240,208,96,1)) brightness(1.35); }
+    100% { filter:drop-shadow(0 0 3px rgba(212,169,58,0.3)) brightness(1); }
+  }
+  .live-logo { display:inline-flex; align-items:center; justify-content:center; width:14px; height:14px; filter:drop-shadow(0 0 2px rgba(212,169,58,0.3)); }
+  .live-logo.beat-flash { animation:beat-flash 0.9s ease-out forwards; }
+  .sidebar-logo-glow { filter:drop-shadow(0 0 3px rgba(212,169,58,0.3)) brightness(1); }
+  .sidebar-logo-glow.beat-flash { animation:logo-flash 0.6s ease-out forwards; }
 
-  .dial-wrap { position:relative; width:160px; height:160px; margin:0 auto 10px; user-select:none; cursor:default; }
+  /* conv-stat idle hint shimmer */
+  @keyframes hint-shimmer {
+    0%,100% { border-color:rgba(201,168,76,0.15); }
+    50%     { border-color:rgba(201,168,76,0.45); }
+  }
+  .conv-stat.idle-hint { animation:hint-shimmer 1.6s ease-in-out infinite; }
+  .conv-hint-text {
+    font-family:var(--mono); font-size:8px; color:var(--muted);
+    letter-spacing:1.5px; opacity:0; margin-top:3px;
+    transition:opacity 0.6s ease;
+    text-transform:uppercase;
+  }
+  .conv-stat.idle-hint .conv-hint-text { opacity:1; }
+
+  .dial-wrap { position:relative; width:200px; height:200px; margin:0 auto 10px; user-select:none; cursor:default; }
   .dial-svg { width:100%; height:100%; transform:rotate(-90deg); overflow:visible; }
   .dial-svg:hover { cursor:grab; }
   body.is-dragging, body.is-dragging * { cursor:grabbing !important; }
@@ -167,24 +189,26 @@
     <div class="shell">
       <div class="topbar">
         <span class="brand">Internet Time</span>
-        <svg class="live-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="50,8 58,32 84,32 63,49 71,73 50,57 29,73 37,49 16,32 42,32" fill="#c9a84c"/>
-        </svg>
+        <span class="live-logo">
+          <svg width="14" height="14" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="50,8 58,32 84,32 63,49 71,73 50,57 29,73 37,49 16,32 42,32" fill="#c9a84c"/>
+          </svg>
+        </span>
       </div>
 
       <div class="dial-wrap" id="dialWrap">
         <svg class="dial-svg" id="dialSvg" viewBox="0 0 190 190" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" style="stop-color:#8a5e0a"/>
-              <stop offset="100%" style="stop-color:#c9a84c"/>
+              <stop id="arcStop1" offset="0%" style="stop-color:#8a5e0a"/>
+              <stop id="arcStop2" offset="100%" style="stop-color:#c9a84c"/>
             </linearGradient>
           </defs>
           <g id="ticks"></g>
-          <circle class="track" cx="95" cy="95" r="80"/>
-          <circle class="progress" id="arc" cx="95" cy="95" r="80" stroke-dasharray="502.65" stroke-dashoffset="502.65"/>
+          <circle class="track" cx="95" cy="95" r="88"/>
+          <circle class="progress" id="arc" cx="95" cy="95" r="88" stroke-dasharray="552.92" stroke-dashoffset="552.92"/>
           <circle cx="95" cy="95" r="95" fill="transparent"/>
-          <circle id="handle" cx="95" cy="15" r="7"
+          <circle id="handle" cx="95" cy="7" r="7"
             fill="#c9a84c" stroke="#071020" stroke-width="2"
             style="filter:drop-shadow(0 0 5px rgba(201,168,76,0.9))"/>
         </svg>
@@ -211,6 +235,7 @@
         <div class="stat conv-stat" id="convStat">
           <div class="stat-val" id="convVal">--:--</div>
           <div class="stat-lbl" id="convLbl">@ ?</div>
+          <div class="conv-hint-text">drag dial</div>
         </div>
       </div>
 
@@ -224,29 +249,35 @@
 </div>
 
 <script>
-  const CX = 95, CY = 95, R = 80;
+  const CX = 95, CY = 95, R = 88;
   const circumference = 2 * Math.PI * R;
 
   (function() {
     const g = document.getElementById('ticks');
-    for (let i = 0; i < 10; i++) {
-      const a = (i / 10) * 2 * Math.PI - Math.PI / 2;
+    for (let i = 0; i < 20; i++) {
+      const isMajor = i % 2 === 0; // every 100 beats
+      const a = (i / 20) * 2 * Math.PI - Math.PI / 2;
+      const innerLen = isMajor ? 11 : 6;
       const mk = (inner, outer) => [CX+inner*Math.cos(a), CY+inner*Math.sin(a), CX+outer*Math.cos(a), CY+outer*Math.sin(a)];
-      const [x1,y1,x2,y2] = mk(R-10, R+2);
+      const [x1,y1,x2,y2] = mk(R - innerLen, R + 2);
       const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
       ln.setAttribute('x1',x1); ln.setAttribute('y1',y1);
       ln.setAttribute('x2',x2); ln.setAttribute('y2',y2);
-      ln.setAttribute('stroke','#1e3048'); ln.setAttribute('stroke-width', i===0?'2':'1'); ln.setAttribute('stroke-linecap','round');
+      ln.setAttribute('stroke', isMajor ? '#2e5070' : '#1e3048');
+      ln.setAttribute('stroke-width', isMajor ? (i===0?'2':'1.5') : '1');
+      ln.setAttribute('stroke-linecap','round');
       g.appendChild(ln);
-      const [lx,ly] = [CX+(R-22)*Math.cos(a), CY+(R-22)*Math.sin(a)];
-      const tx = document.createElementNS('http://www.w3.org/2000/svg','text');
-      tx.setAttribute('x',lx); tx.setAttribute('y',ly);
-      tx.setAttribute('text-anchor','middle'); tx.setAttribute('dominant-baseline','central');
-      tx.setAttribute('fill','#2e5070'); tx.setAttribute('font-size','7');
-      tx.setAttribute('font-family','Share Tech Mono, monospace');
-      tx.setAttribute('transform',`rotate(90,${lx},${ly})`);
-      tx.textContent = (i*100).toString().padStart(3,'0');
-      g.appendChild(tx);
+      if (isMajor) {
+        const [lx,ly] = [CX+(R-24)*Math.cos(a), CY+(R-24)*Math.sin(a)];
+        const tx = document.createElementNS('http://www.w3.org/2000/svg','text');
+        tx.setAttribute('x',lx); tx.setAttribute('y',ly);
+        tx.setAttribute('text-anchor','middle'); tx.setAttribute('dominant-baseline','central');
+        tx.setAttribute('fill','#3a6080'); tx.setAttribute('font-size','7');
+        tx.setAttribute('font-family','Share Tech Mono, monospace');
+        tx.setAttribute('transform',`rotate(90,${lx},${ly})`);
+        tx.textContent = (i/2*100).toString().padStart(3,'0');
+        g.appendChild(tx);
+      }
     }
   })();
 
@@ -261,8 +292,12 @@
   const convLbl     = document.getElementById('convLbl');
   const dialSvg     = document.getElementById('dialSvg');
   const dialWrap    = document.getElementById('dialWrap');
+  const liveLogo    = document.querySelector('.live-logo');
+  const sidebarLogo = document.querySelector('.sidebar-logo-glow');
+  const arcStop1    = document.getElementById('arcStop1');
+  const arcStop2    = document.getElementById('arcStop2');
 
-  let lastBeat = -1, dragging = false, dragBeatWhole = 0, resetTimer = null;
+  let lastBeat = -1, dragging = false, dragBeatWhole = 0, resetTimer = null, hintTimer = null;
 
   const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   function getInternetDate() {
@@ -299,6 +334,33 @@
     document.getElementById('christmasBeats').textContent = beatsUntil(11, 25) + ' @';
   }
 
+  // #6 time-of-day arc colors
+  function getTimeOfDayColors(hour) {
+    if (hour >= 5 && hour < 8)   return ['#6080c0','#f09050'];
+    if (hour >= 8 && hour < 11)  return ['#c08830','#f0d060'];
+    if (hour >= 11 && hour < 16) return ['#d4a93a','#fff080'];
+    if (hour >= 16 && hour < 20) return ['#c05818','#f0a030'];
+    return ['#304880','#8090c8'];
+  }
+  function updateArcColors() {
+    const [c1, c2] = getTimeOfDayColors(new Date().getHours());
+    if (arcStop1) arcStop1.style.stopColor = c1;
+    if (arcStop2) arcStop2.style.stopColor = c2;
+  }
+
+  // Alternating 3-second flash between star and sidebar logo
+  let flashToggle = 0;
+  function fireAlternatingFlash() {
+    const el = flashToggle % 2 === 0 ? liveLogo : sidebarLogo;
+    if (el) {
+      el.classList.remove('beat-flash');
+      void el.offsetWidth;
+      el.classList.add('beat-flash');
+    }
+    flashToggle++;
+  }
+  setInterval(fireAlternatingFlash, 2000);
+
   function placeHandle(n) {
     const a = (n / 1000) * 2 * Math.PI - Math.PI / 2;
     handle.setAttribute('cx', CX + R * Math.cos(a));
@@ -317,8 +379,19 @@
     return beat;
   }
 
+  // #3 idle hint
+  function startHintTimer() {
+    clearHintTimer();
+    hintTimer = setTimeout(() => convStat.classList.add('idle-hint'), 8000);
+  }
+  function clearHintTimer() {
+    if (hintTimer) { clearTimeout(hintTimer); hintTimer = null; }
+    convStat.classList.remove('idle-hint');
+  }
+
   function startDrag(cx, cy) {
     if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
+    clearHintTimer();
     dragging = true;
     document.body.classList.add('is-dragging');
     centerLabel.textContent = 'explore';
@@ -333,6 +406,8 @@
     const w = Math.floor(b);
     dragBeatWhole = w;
     placeHandle(b);
+    // #5 keep arc in sync during drag so release sweeps smoothly back
+    arc.style.strokeDashoffset = circumference * (1 - b / 1000);
     beatNum.textContent = w.toString().padStart(3,'0');
     convVal.textContent = beatsToLocal(w);
     convLbl.textContent = '@' + w.toString().padStart(3,'0');
@@ -343,6 +418,7 @@
     convStat.classList.remove('active');
     convVal.textContent = '--:--';
     convLbl.textContent = '@ ?';
+    startHintTimer();
   }
 
   function endDrag() {
@@ -373,8 +449,10 @@
     if (whole !== lastBeat) {
       beatNum.classList.add('tick');
       setTimeout(() => beatNum.classList.remove('tick'), 300);
+      updateArcColors(); // #6
       lastBeat = whole;
     }
+
     beatNum.textContent = whole.toString().padStart(3,'0');
     beatFrac.textContent = '.' + Math.floor(frac * 100).toString().padStart(2,'0');
     centerLabel.textContent = '@ beats';
@@ -389,6 +467,8 @@
     updateCountdowns();
   }
 
+  updateArcColors();
+  startHintTimer();
   tick();
   setInterval(tick, 200);
 </script>
