@@ -297,7 +297,7 @@
   const arcStop1    = document.getElementById('arcStop1');
   const arcStop2    = document.getElementById('arcStop2');
 
-  let lastBeat = -1, dragging = false, dragBeatWhole = 0, resetTimer = null, hintTimer = null;
+  let lastBeat = -1, dragging = false, dragBeatWhole = 0, dragBeat = 0, resetTimer = null, hintTimer = null;
 
   const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   function getInternetDate() {
@@ -393,6 +393,7 @@
     if (resetTimer) { clearTimeout(resetTimer); resetTimer = null; }
     clearHintTimer();
     dragging = true;
+    dragBeat = clientToBeat(cx, cy); // seed so no jump on first frame
     document.body.classList.add('is-dragging');
     centerLabel.textContent = 'explore';
     beatFrac.textContent = '';
@@ -402,12 +403,12 @@
 
   function updateDrag(cx, cy) {
     if (!dragging) return;
-    const b = clientToBeat(cx, cy);
-    const w = Math.floor(b);
+    const raw = clientToBeat(cx, cy);
+    dragBeat = dragBeat + (raw - dragBeat) * 0.4;
+    const w = Math.floor(dragBeat);
     dragBeatWhole = w;
-    placeHandle(b);
-    // #5 keep arc in sync during drag so release sweeps smoothly back
-    arc.style.strokeDashoffset = circumference * (1 - b / 1000);
+    placeHandle(dragBeat);
+    arc.style.strokeDashoffset = circumference * (1 - dragBeat / 1000);
     beatNum.textContent = w.toString().padStart(3,'0');
     convVal.textContent = beatsToLocal(w);
     convLbl.textContent = '@' + w.toString().padStart(3,'0');
