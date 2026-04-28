@@ -418,7 +418,11 @@
   function updateDrag(cx, cy) {
     if (!dragging) return;
     const raw = clientToBeat(cx, cy);
-    dragBeat = dragBeat + (raw - dragBeat) * 0.4;
+    // Handle wrap-around at @000/@999 boundary
+    let diff = raw - dragBeat;
+    if (diff > 500) diff -= 1000;
+    if (diff < -500) diff += 1000;
+    dragBeat = (dragBeat + diff * 0.4 + 1000) % 1000;
     const w = Math.floor(dragBeat);
     dragBeatWhole = w;
     placeHandle(dragBeat);
