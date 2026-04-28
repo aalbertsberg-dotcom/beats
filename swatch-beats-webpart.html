@@ -186,13 +186,13 @@
 
     <!-- Countdown banner -->
     <div class="banner">
-      <div class="countdown-item">
+      <div class="countdown-item" id="halloweenBtn">
         <div class="countdown-emoji">🎃</div>
         <div class="countdown-beats" id="halloweenBeats">---,---</div>
         <div class="countdown-label">Halloween</div>
       </div>
       <div class="countdown-divider"></div>
-      <div class="countdown-item">
+      <div class="countdown-item" id="christmasBtn">
         <div class="countdown-emoji">🎄</div>
         <div class="countdown-beats" id="christmasBeats">---,---</div>
         <div class="countdown-label">Christmas</div>
@@ -493,6 +493,8 @@
     fxCanvas.height = outer.offsetHeight;
   }
   resizeCanvas();
+  setTimeout(resizeCanvas, 500);
+  setTimeout(resizeCanvas, 1500);
   window.addEventListener('resize', resizeCanvas);
 
   function spawnSnow(n) {
@@ -612,8 +614,8 @@
     requestAnimationFrame(fxLoop);
   }
 
-  document.querySelector('.countdown-item:first-child').addEventListener('click', () => triggerFX('bats'));
-  document.querySelector('.countdown-item:last-child').addEventListener('click',  () => triggerFX('snow'));
+  document.getElementById('halloweenBtn').addEventListener('click', () => { resizeCanvas(); triggerFX('bats'); });
+  document.getElementById('christmasBtn').addEventListener('click', () => { resizeCanvas(); triggerFX('snow'); });
 
   updateArcColors();
   startHintTimer();
