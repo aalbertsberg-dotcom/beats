@@ -80,6 +80,20 @@
   }
   /* animation overlay */
   .outer { position:relative; }
+  #orbitCanvas {
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    pointer-events:none;
+    border-radius:4px;
+    z-index:11;
+  }
+  /* border pulse every 15s */
+  @keyframes border-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(212,169,58,0); }
+    50%      { box-shadow: 0 0 0 3px rgba(212,169,58,0.6), 0 0 16px 2px rgba(212,169,58,0.25); }
+  }
+  .outer.pulsing { animation: border-pulse 1.5s ease-in-out; border-radius:4px; }
   #fxCanvas {
     position:absolute;
     top:0; left:0;
@@ -167,6 +181,7 @@
 <body>
 <div class="outer">
   <canvas id="fxCanvas"></canvas>
+  <canvas id="orbitCanvas"></canvas>
 
   <!-- Sidebar -->
   <div class="sidebar">
@@ -623,6 +638,122 @@
 
   document.getElementById('halloweenBtn').addEventListener('click', () => { resizeCanvas(); triggerFX('bats'); });
   document.getElementById('christmasBtn').addEventListener('click', () => { resizeCanvas(); triggerFX('snow'); });
+
+  // ---- Orbit dot + border pulse ----
+  const orbitCanvas = document.getElementById('orbitCanvas');
+  const octx = orbitCanvas.getContext('2d');
+  const outerEl = document.querySelector('.outer');
+  let orbitAngle = 0;
+
+  function resizeOrbit() {
+    orbitCanvas.width  = outerEl.offsetWidth;
+    orbitCanvas.height = outerEl.offsetHeight;
+  }
+  resizeOrbit();
+  setTimeout(resizeOrbit, 500);
+  setTimeout(resizeOrbit, 1500);
+  window.addEventListener('resize', resizeOrbit);
+
+  // Build rounded-rect path matching the outer widget
+  function roundRectPath(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  // Get point along the rounded rect perimeter at t=[0,1]
+  function perimeterPoint(t, w, h, r) {
+    const top    = w - 2*r;
+    const right  = h - 2*r;
+    const bottom = w - 2*r;
+    const left   = h - 2*r;
+    const corners = r * Math.PI / 2;
+    const total = top + corners + right + corners + bottom + corners + left + corners;
+    let d = ((t % 1) + 1) % 1 * total;
+
+    // top edge
+    if (d < top) return { x: r + d, y: 0 };
+    d -= top;
+    // top-right corner
+    if (d < corners) { const a = -Math.PI/2 + (d/corners)*(Math.PI/2); return { x: w-r + Math.cos(a)*r, y: r + Math.sin(a)*r }; }
+    d -= corners;
+    // right edge
+    if (d < right) return { x: w, y: r + d };
+    d -= right;
+    // bottom-right corner
+    if (d < corners) { const a = 0 + (d/corners)*(Math.PI/2); return { x: w-r + Math.cos(a)*r, y: h-r + Math.sin(a)*r }; }
+    d -= corners;
+    // bottom edge
+    if (d < bottom) return { x: w-r - d, y: h };
+    d -= bottom;
+    // bottom-left corner
+    if (d < corners) { const a = Math.PI/2 + (d/corners)*(Math.PI/2); return { x: r + Math.cos(a)*r, y: h-r + Math.sin(a)*r }; }
+    d -= corners;
+    // left edge
+    if (d < left) return { x: 0, y: h-r - d };
+    d -= left;
+    // top-left corner
+    const a = Math.PI + (d/corners)*(Math.PI/2);
+    return { x: r + Math.cos(a)*r, y: r + Math.sin(a)*r };
+  }
+
+  function orbitLoop() {
+    const w = orbitCanvas.width, h = orbitCanvas.height;
+    octx.clearRect(0, 0, w, h);
+
+    orbitAngle = (orbitAngle + 0.0012) % 1;
+
+    const pt = perimeterPoint(orbitAngle, w, h, 4);
+
+    // trail
+    for (let i = 1; i <= 18; i++) {
+      const tPrev = ((orbitAngle - i * 0.002) + 1) % 1;
+      const tp = perimeterPoint(tPrev, w, h, 4);
+      const alpha = (1 - i / 18) * 0.35;
+      octx.beginPath();
+      octx.arc(tp.x, tp.y, 2.5, 0, Math.PI * 2);
+      octx.fillStyle = `rgba(212,169,58,${alpha})`;
+      octx.fill();
+    }
+
+    // main dot glow
+    const grad = octx.createRadialGradient(pt.x, pt.y, 0, pt.x, pt.y, 8);
+    grad.addColorStop(0, 'rgba(255,240,120,0.9)');
+    grad.addColorStop(0.4, 'rgba(212,169,58,0.5)');
+    grad.addColorStop(1, 'rgba(212,169,58,0)');
+    octx.beginPath();
+    octx.arc(pt.x, pt.y, 8, 0, Math.PI * 2);
+    octx.fillStyle = grad;
+    octx.fill();
+
+    // solid center dot
+    octx.beginPath();
+    octx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
+    octx.fillStyle = '#fff0a0';
+    octx.fill();
+
+    requestAnimationFrame(orbitLoop);
+  }
+
+  // Border pulse every 15 seconds
+  function triggerBorderPulse() {
+    outerEl.classList.remove('pulsing');
+    void outerEl.offsetWidth;
+    outerEl.classList.add('pulsing');
+    setTimeout(() => outerEl.classList.remove('pulsing'), 1500);
+  }
+  triggerBorderPulse();
+  setInterval(triggerBorderPulse, 15000);
+
+  orbitLoop();
 
   updateArcColors();
   startHintTimer();
