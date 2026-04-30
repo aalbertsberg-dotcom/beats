@@ -439,7 +439,7 @@
     let diff = raw - dragBeat;
     if (diff > 500) diff -= 1000;
     if (diff < -500) diff += 1000;
-    dragBeat = (dragBeat + diff * 0.4 + 1000) % 1000;
+    dragBeat = (dragBeat + diff * 0.25 + 1000) % 1000;
     const w = Math.floor(dragBeat);
     dragBeatWhole = w;
     placeHandle(dragBeat);
@@ -466,6 +466,23 @@
     resetTimer = setTimeout(resetConv, 5000);
   }
 
+  // Arrow key nudge — active when conv stat is showing
+  window.addEventListener('keydown', e => {
+    if (!convStat.classList.contains('active')) return;
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    const dir = e.key === 'ArrowRight' ? 1 : -1;
+    dragBeat = (dragBeat + dir + 1000) % 1000;
+    dragBeatWhole = Math.floor(dragBeat);
+    placeHandle(dragBeat);
+    arc.style.strokeDashoffset = circumference * (1 - dragBeat / 1000);
+    beatNum.textContent = dragBeatWhole.toString().padStart(3,'0');
+    convVal.textContent = beatsToLocal(dragBeatWhole);
+    convLbl.textContent = '@' + dragBeatWhole.toString().padStart(3,'0');
+    // Reset the auto-clear timer
+    if (resetTimer) clearTimeout(resetTimer);
+    resetTimer = setTimeout(resetConv, 5000);
+  });
   dialWrap.addEventListener('mousedown',  e => { e.preventDefault(); startDrag(e.clientX, e.clientY); });
   window.addEventListener('mousemove',    e => { if (dragging) updateDrag(e.clientX, e.clientY); });
   window.addEventListener('mouseup',      endDrag);
