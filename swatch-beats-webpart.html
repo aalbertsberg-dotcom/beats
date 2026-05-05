@@ -865,24 +865,25 @@
   }
 
   function onSliderInput() {
-    const val = parseInt(hourSlider.value); // -12 to 12, 0 = center
+    const val = parseInt(hourSlider.value); // -12 to 12
     if (val === 0) { resetConv(); return; }
 
-    const isPm = val > 0;
-    const hour12 = Math.abs(val);
+    // val: -12 = bottom (12am midnight), 0 = center (noon-ish), 12 = top (12pm noon)
+    // Map -12..12 to hour24: -12=0, -11=1, ... 0=12, 1=13... 12=12
     let hour24;
-    if (isPm) {
-      hour24 = hour12 === 12 ? 12 : hour12 + 12;
+    if (val < 0) {
+      hour24 = 12 + val; // -12→0, -11→1 ... -1→11
     } else {
-      hour24 = hour12 === 12 ? 0 : hour12;
+      hour24 = 12 + val; // 0→12, 1→13 ... 12→24→use 0
+      if (hour24 >= 24) hour24 = 0;
     }
 
     const beats = hourToBeats(hour24);
-    const h = hour12;
-    const ap = isPm ? 'pm' : 'am';
+    const h = hour24 % 12 || 12;
+    const ap = hour24 >= 12 ? 'pm' : 'am';
 
-    rpPmLabel.classList.toggle('active', isPm);
-    rpAmLabel.classList.toggle('active', !isPm);
+    rpPmLabel.classList.toggle('active', hour24 >= 12);
+    rpAmLabel.classList.toggle('active', hour24 < 12);
 
     convStat.classList.add('active');
     convVal.textContent = h + ':00' + ap;
