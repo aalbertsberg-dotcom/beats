@@ -217,26 +217,29 @@
     appearance:none;
     writing-mode:vertical-lr;
     direction:rtl;
-    width:20px;
+    width:100%;
     height:100%;
     background:transparent;
     outline:none;
     cursor:pointer;
+    padding:0;
+    margin:0;
   }
   .hour-slider::-webkit-slider-runnable-track {
-    width:4px;
+    width:3px;
     background:var(--border);
     border-radius:2px;
   }
   .hour-slider::-webkit-slider-thumb {
     -webkit-appearance:none;
-    width:18px;
+    width:24px;
     height:8px;
     background:var(--accent);
     border-radius:3px;
     border:1px solid var(--accent2);
     box-shadow:0 0 6px var(--glow);
     cursor:grab;
+    margin-left:-11px;
   }
   .hour-slider:active::-webkit-slider-thumb { cursor:grabbing; background:var(--accent2); }
   .rp-divider { width:20px; height:1px; background:var(--border); flex-shrink:0; }
@@ -349,7 +352,7 @@
     <div class="rp-divider"></div>
     <div class="slider-wrap">
       <input type="range" class="hour-slider" id="hourSlider"
-        min="1" max="12" step="1" value="6"/>
+        min="-12" max="12" step="1" value="0"/>
     </div>
     <div class="rp-divider"></div>
     <span class="rp-label" id="rpAmLabel">AM</span>
@@ -850,10 +853,9 @@
   orbitLoop();
 
   // ---- Hour slider ----
-  const hourSlider  = document.getElementById('hourSlider');
-  const rpAmLabel   = document.getElementById('rpAmLabel');
-  const rpPmLabel   = document.getElementById('rpPmLabel');
-  let sliderMode = null; // 'am' or 'pm'
+  const hourSlider = document.getElementById('hourSlider');
+  const rpAmLabel  = document.getElementById('rpAmLabel');
+  const rpPmLabel  = document.getElementById('rpPmLabel');
 
   function hourToBeats(hour24) {
     const localOffsetSec = -new Date().getTimezoneOffset() * 60;
@@ -862,54 +864,63 @@
     return Math.round(bmtSec / 86.4) % 1000;
   }
 
-  function formatHour(hour24) {
-    let h = hour24 % 12 || 12;
-    const ap = hour24 >= 12 ? 'pm' : 'am';
-    return h + ':00' + ap;
-  }
+  function onSliderInput() {
+    const val = parseInt(hourSlider.value); // -12 to 12, 0 = center
+    if (val === 0) { resetConv(); return; }
 
-  function updateSliderDisplay() {
-    const val = parseInt(hourSlider.value); // 1-12, top=PM bottom=AM
-    // slider max(12) = top = PM, min(1) = bottom = AM
-    // Middle (6-7) is ambiguous — highlight active label
-    const isPm = sliderMode === 'pm';
-    const hour24 = isPm ? (val === 12 ? 12 : val + 12) : (val === 12 ? 0 : val);
+    const isPm = val > 0;
+    const hour12 = Math.abs(val);
+    let hour24;
+    if (isPm) {
+      hour24 = hour12 === 12 ? 12 : hour12 + 12;
+    } else {
+      hour24 = hour12 === 12 ? 0 : hour12;
+    }
+
     const beats = hourToBeats(hour24);
-    const localStr = formatHour(hour24);
+    const h = hour12;
+    const ap = isPm ? 'pm' : 'am';
 
-    rpAmLabel.classList.toggle('active', !isPm);
     rpPmLabel.classList.toggle('active', isPm);
+    rpAmLabel.classList.toggle('active', !isPm);
 
-    // Feed into conv stat display
     convStat.classList.add('active');
-    convVal.textContent = localStr;
+    convVal.textContent = h + ':00' + ap;
     convLbl.textContent = '@' + beats.toString().padStart(3,'0');
 
-    // Reset auto-clear
     if (resetTimer) clearTimeout(resetTimer);
-    resetTimer = setTimeout(resetConv, 5000);
+    resetTimer = setTimeout(() => {
+      hourSlider.value = 0;
+      rpAmLabel.classList.remove('active');
+      rpPmLabel.classList.remove('active');
+      resetConv();
+    }, 5000);
   }
 
-  hourSlider.addEventListener('mousedown', e => {
-    // Determine AM/PM from click position on slider
-    const rect = hourSlider.getBoundingClientRect();
-    const relY = e.clientY - rect.top;
-    sliderMode = relY < rect.height / 2 ? 'pm' : 'am';
-    clearHintTimer();
-    updateSliderDisplay();
-  });
-  hourSlider.addEventListener('touchstart', e => {
-    const rect = hourSlider.getBoundingClientRect();
-    const relY = e.touches[0].clientY - rect.top;
-    sliderMode = relY < rect.height / 2 ? 'pm' : 'am';
-    clearHintTimer();
-    updateSliderDisplay();
-  }, {passive:true});
-  hourSlider.addEventListener('input', updateSliderDisplay);
+  function onSliderRelease() {
+    hourSlider.value = 0;
+    rpAmLabel.classList.remove('active');
+    rpPmLabel.classList.remove('active');
+  }
 
-  // AM/PM label clicks to lock mode
-  rpAmLabel.addEventListener('click', () => { sliderMode = 'am'; updateSliderDisplay(); });
-  rpPmLabel.addEventListener('click', () => { sliderMode = 'pm'; updateSliderDisplay(); });
+  hourSlider.addEventListener('input', onSliderInput);
+  hourSlider.addEventListener('mouseup', onSliderRelease);
+  hourSlider.addEventListener('touchend', onSliderRelease);
+
+  // Match sidebar and right panel height to center col
+  function matchPanelHeights() {
+    const col = document.querySelector('.col');
+    const sidebar = document.querySelector('.sidebar');
+    const rightPanel = document.querySelector('.right-panel');
+    if (!col || !sidebar || !rightPanel) return;
+    const h = col.offsetHeight + 'px';
+    sidebar.style.height = h;
+    rightPanel.style.height = h;
+  }
+  matchPanelHeights();
+  setTimeout(matchPanelHeights, 300);
+  setTimeout(matchPanelHeights, 800);
+  window.addEventListener('resize', matchPanelHeights);
 
   updateArcColors();
   startHintTimer();
