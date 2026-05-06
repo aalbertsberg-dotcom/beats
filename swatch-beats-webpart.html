@@ -211,7 +211,8 @@
     justify-content:center;
     width:100%;
     min-height:0;
-    overflow:hidden;
+    overflow:visible;
+    position:relative;
   }
   .hour-slider {
     -webkit-appearance:none;
@@ -353,6 +354,7 @@
     <div class="slider-wrap">
       <input type="range" class="hour-slider" id="hourSlider"
         min="-12" max="12" step="1" value="0"/>
+      <svg id="sliderTicks" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;"></svg>
     </div>
     <div class="rp-divider"></div>
     <span class="rp-label" id="rpAmLabel">AM</span>
@@ -903,6 +905,65 @@
     rpAmLabel.classList.remove('active');
     rpPmLabel.classList.remove('active');
   }
+
+  // Draw slider tick marks and quarter labels
+  function drawSliderTicks() {
+    const svg = document.getElementById('sliderTicks');
+    const wrap = svg.parentElement;
+    const h = wrap.offsetHeight;
+    if (h < 10) return;
+    svg.setAttribute('viewBox', `0 0 40 ${h}`);
+    svg.innerHTML = '';
+
+    // Quarter labels: 12a(bottom), 6a, 12p, 6p(top)
+    const quarters = [
+      { val: -12, label: '12a' },
+      { val: -6,  label: '6a'  },
+      { val:  0,  label: '12p' },
+      { val:  6,  label: '6p'  },
+      { val:  12, label: '12p' },
+    ];
+
+    for (let i = -12; i <= 12; i++) {
+      // y position: val=-12 = bottom, val=12 = top
+      const y = h - ((i + 12) / 24) * h;
+      const isMajor = i % 6 === 0;
+      const tickLen = isMajor ? 8 : 4;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', 28);
+      line.setAttribute('y1', y);
+      line.setAttribute('x2', 28 + tickLen);
+      line.setAttribute('y2', y);
+      line.setAttribute('stroke', isMajor ? '#c9a84c' : '#2e5070');
+      line.setAttribute('stroke-width', isMajor ? '1.5' : '1');
+      svg.appendChild(line);
+    }
+
+    // Labels at quarters
+    const labelData = [
+      { val: -12, text: '12a' },
+      { val: -6,  text: '6a'  },
+      { val:  0,  text: '12p' },
+      { val:  6,  text: '6p'  },
+    ];
+    labelData.forEach(({ val, text }) => {
+      const y = h - ((val + 12) / 24) * h;
+      const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      txt.setAttribute('x', 16);
+      txt.setAttribute('y', y + 3);
+      txt.setAttribute('text-anchor', 'middle');
+      txt.setAttribute('fill', '#7090aa');
+      txt.setAttribute('font-size', '6');
+      txt.setAttribute('font-family', 'Share Tech Mono, monospace');
+      txt.textContent = text;
+      svg.appendChild(txt);
+    });
+  }
+
+  drawSliderTicks();
+  setTimeout(drawSliderTicks, 400);
+  setTimeout(drawSliderTicks, 900);
+  window.addEventListener('resize', drawSliderTicks);
 
   hourSlider.addEventListener('input', onSliderInput);
   hourSlider.addEventListener('mouseup', onSliderRelease);
