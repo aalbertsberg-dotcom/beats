@@ -353,7 +353,7 @@
     <div class="rp-divider"></div>
     <div class="slider-wrap">
       <input type="range" class="hour-slider" id="hourSlider"
-        min="-12" max="12" step="1" value="0"/>
+        min="0" max="23" step="1" value="0"/>
       <svg id="sliderTicks" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;"></svg>
     </div>
     <div class="rp-divider"></div>
@@ -867,28 +867,16 @@
   }
 
   function onSliderInput() {
-    const val = parseInt(hourSlider.value); // -12 to 12
-    if (val === 0) { resetConv(); return; }
-
-    // val: -12 = bottom (12am midnight), 0 = center (noon-ish), 12 = top (12pm noon)
-    // Map -12..12 to hour24: -12=0, -11=1, ... 0=12, 1=13... 12=12
-    let hour24;
-    if (val < 0) {
-      hour24 = 12 + val; // -12→0, -11→1 ... -1→11
-    } else {
-      hour24 = 12 + val; // 0→12, 1→13 ... 12→24→use 0
-      if (hour24 >= 24) hour24 = 0;
-    }
-
+    const hour24 = parseInt(hourSlider.value); // 0=midnight bottom, 23=11pm top
     const beats = hourToBeats(hour24);
-    const h = hour24 % 12 || 12;
+    const h12 = hour24 % 12 || 12;
     const ap = hour24 >= 12 ? 'pm' : 'am';
 
     rpPmLabel.classList.toggle('active', hour24 >= 12);
     rpAmLabel.classList.toggle('active', hour24 < 12);
 
     convStat.classList.add('active');
-    convVal.textContent = h + ':00' + ap;
+    convVal.textContent = h12 + ':00' + ap;
     convLbl.textContent = '@' + beats.toString().padStart(3,'0');
 
     if (resetTimer) clearTimeout(resetTimer);
@@ -906,58 +894,48 @@
     rpPmLabel.classList.remove('active');
   }
 
-  // Draw slider tick marks and quarter labels
+  // Draw tick marks — positions match slider 0-23, bottom to top
   function drawSliderTicks() {
     const svg = document.getElementById('sliderTicks');
     const wrap = svg.parentElement;
-    const h = wrap.offsetHeight;
-    if (h < 10) return;
-    svg.setAttribute('viewBox', `0 0 40 ${h}`);
+    const totalH = wrap.offsetHeight;
+    if (totalH < 10) return;
+    svg.setAttribute('viewBox', `0 0 40 ${totalH}`);
     svg.innerHTML = '';
 
-    // Quarter labels: 12a(bottom), 6a, 12p, 6p(top)
-    const quarters = [
-      { val: -12, label: '12a' },
-      { val: -6,  label: '6a'  },
-      { val:  0,  label: '12p' },
-      { val:  6,  label: '6p'  },
-      { val:  12, label: '12p' },
-    ];
-
-    for (let i = -12; i <= 12; i++) {
-      // y position: val=-12 = bottom, val=12 = top
-      const y = h - ((i + 12) / 24) * h;
+    for (let i = 0; i <= 23; i++) {
+      const y = totalH - (i / 23) * totalH;
       const isMajor = i % 6 === 0;
-      const tickLen = isMajor ? 8 : 4;
+      const tickLen = isMajor ? 9 : 4;
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', 28);
-      line.setAttribute('y1', y);
-      line.setAttribute('x2', 28 + tickLen);
-      line.setAttribute('y2', y);
+      line.setAttribute('x1', 30 - tickLen); line.setAttribute('y1', y);
+      line.setAttribute('x2', 30);           line.setAttribute('y2', y);
       line.setAttribute('stroke', isMajor ? '#c9a84c' : '#2e5070');
       line.setAttribute('stroke-width', isMajor ? '1.5' : '1');
       svg.appendChild(line);
+
+      if (isMajor) {
+        const labels = ['12a','6a','12p','6p'];
+        const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+        txt.setAttribute('x', 13);
+        txt.setAttribute('y', y + 3);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('fill', '#9ab8d0');
+        txt.setAttribute('font-size', '8');
+        txt.setAttribute('font-family', 'Share Tech Mono, monospace');
+        txt.textContent = labels[i / 6];
+        svg.appendChild(txt);
+      }
     }
 
-    // Labels at quarters
-    const labelData = [
-      { val: -12, text: '12a' },
-      { val: -6,  text: '6a'  },
-      { val:  0,  text: '12p' },
-      { val:  6,  text: '6p'  },
-    ];
-    labelData.forEach(({ val, text }) => {
-      const y = h - ((val + 12) / 24) * h;
-      const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      txt.setAttribute('x', 16);
-      txt.setAttribute('y', y + 3);
-      txt.setAttribute('text-anchor', 'middle');
-      txt.setAttribute('fill', '#7090aa');
-      txt.setAttribute('font-size', '6');
-      txt.setAttribute('font-family', 'Share Tech Mono, monospace');
-      txt.textContent = text;
-      svg.appendChild(txt);
-    });
+    // AM/PM divider at hour 12
+    const pmY = totalH - (12 / 23) * totalH;
+    const div = document.createElementNS('http://www.w3.org/2000/svg','line');
+    div.setAttribute('x1', 20); div.setAttribute('y1', pmY);
+    div.setAttribute('x2', 38); div.setAttribute('y2', pmY);
+    div.setAttribute('stroke', 'rgba(201,168,76,0.4)');
+    div.setAttribute('stroke-width', '1');
+    svg.appendChild(div);
   }
 
   drawSliderTicks();
