@@ -342,6 +342,12 @@
 
       <div class="footer">
         <span class="footer-date" id="footerDate">--</span>
+        <button id="detonateBtn" style="
+          font-family:var(--mono);font-size:9px;letter-spacing:1.5px;
+          color:var(--muted);background:none;border:none;cursor:pointer;
+          padding:0;text-transform:uppercase;opacity:0.6;
+          transition:color 0.2s,opacity 0.2s;
+        " title="🔴 Do not press">💥</button>
       </div>
     </div>
 
@@ -963,6 +969,109 @@
   setTimeout(matchPanelHeights, 300);
   setTimeout(matchPanelHeights, 800);
   window.addEventListener('resize', matchPanelHeights);
+
+  // ---- Explosion effect ----
+  const detonateBtn = document.getElementById('detonateBtn');
+  const col = document.querySelector('.col');
+
+  function detonate() {
+    if (document.getElementById('explodeCanvas')) return; // already running
+    detonateBtn.disabled = true;
+
+    const rect = col.getBoundingClientRect();
+    const outerRect = outerEl.getBoundingClientRect();
+    const W = outerRect.width, H = outerRect.height;
+
+    // Create canvas over entire outer widget
+    const ec = document.createElement('canvas');
+    ec.id = 'explodeCanvas';
+    ec.width = W; ec.height = H;
+    ec.style.cssText = `position:fixed;top:${outerRect.top}px;left:${outerRect.left}px;width:${W}px;height:${H}px;pointer-events:none;z-index:9999;`;
+    document.body.appendChild(ec);
+    const ectx = ec.getContext('2d');
+
+    // Hide widget content
+    col.style.opacity = '0';
+
+    // Generate shards — irregular polygons covering the widget area
+    const shards = [];
+    const cols = 6, rows = 8;
+    const sw = W / cols, sh = H / rows;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const cx = (c + 0.5) * sw, cy = (r + 0.5) * sh;
+        // Irregular polygon around cell center
+        const pts = [];
+        const n = 4 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < n; i++) {
+          const a = (i / n) * Math.PI * 2 + Math.random() * 0.4;
+          const rad = (Math.min(sw, sh) * 0.5) * (0.7 + Math.random() * 0.4);
+          pts.push({ x: cx + Math.cos(a) * rad, y: cy + Math.sin(a) * rad });
+        }
+        // Color: mix of navy and gold
+        const isGold = Math.random() < 0.25;
+        const color = isGold ? `rgba(201,168,76,${0.7 + Math.random()*0.3})` : `rgba(${10+Math.floor(Math.random()*20)},${22+Math.floor(Math.random()*20)},${40+Math.floor(Math.random()*20)},0.95)`;
+        const vx = (cx - W/2) * (0.04 + Math.random() * 0.08) + (Math.random()-0.5)*3;
+        const vy = (cy - H/2) * (0.04 + Math.random() * 0.08) - Math.random()*4;
+        shards.push({ pts, cx, cy, vx, vy, rot:0, rotV:(Math.random()-0.5)*0.15, color, opacity:1, settled:false, settleY: H - 20 - Math.random()*30 });
+      }
+    }
+
+    const startTime = Date.now();
+    const explodeDur = 1200;  // explosion phase ms
+    const rubbleDur  = 3000;  // rubble sits ms
+    const fadeDur    = 800;   // fade back in ms
+
+    function explodeLoop() {
+      const now = Date.now();
+      const elapsed = now - startTime;
+      ectx.clearRect(0, 0, W, H);
+
+      if (elapsed < explodeDur + rubbleDur) {
+        shards.forEach(s => {
+          if (elapsed < explodeDur) {
+            s.cx += s.vx;
+            s.cy += s.vy;
+            s.vy += 0.18; // gravity
+            s.rot += s.rotV;
+            if (s.cy > s.settleY) { s.cy = s.settleY; s.vy *= -0.15; s.rotV *= 0.5; }
+          }
+          ectx.save();
+          ectx.translate(s.cx, s.cy);
+          ectx.rotate(s.rot);
+          ectx.globalAlpha = s.opacity;
+          ectx.beginPath();
+          s.pts.forEach((p,i) => {
+            const lx = p.x - s.cx + (s.pts.reduce((a,b)=>a+b.x,0)/s.pts.length - s.cx) * 0;
+            const ly = p.y - s.cy;
+            i === 0 ? ectx.moveTo(p.x-s.cx, ly) : ectx.lineTo(p.x-s.cx, ly);
+          });
+          ectx.closePath();
+          ectx.fillStyle = s.color;
+          ectx.fill();
+          ectx.strokeStyle = 'rgba(201,168,76,0.3)';
+          ectx.lineWidth = 0.5;
+          ectx.stroke();
+          ectx.restore();
+        });
+        requestAnimationFrame(explodeLoop);
+      } else {
+        // Fade canvas out, fade widget back in
+        ectx.clearRect(0, 0, W, H);
+        ec.remove();
+        col.style.transition = 'opacity 0.8s ease';
+        col.style.opacity = '1';
+        setTimeout(() => {
+          col.style.transition = '';
+          detonateBtn.disabled = false;
+        }, fadeDur);
+      }
+    }
+
+    requestAnimationFrame(explodeLoop);
+  }
+
+  detonateBtn.addEventListener('click', detonate);
 
   updateArcColors();
   startHintTimer();
