@@ -972,103 +972,292 @@
 
   // ---- Explosion effect ----
   const detonateBtn = document.getElementById('detonateBtn');
-  const col = document.querySelector('.col');
 
   function detonate() {
-    if (document.getElementById('explodeCanvas')) return; // already running
+    if (document.getElementById('explodeCanvas')) return;
     detonateBtn.disabled = true;
 
-    const rect = col.getBoundingClientRect();
-    const outerRect = outerEl.getBoundingClientRect();
-    const W = outerRect.width, H = outerRect.height;
+    const rect = outerEl.getBoundingClientRect();
+    const W = Math.ceil(rect.width);
+    const H = Math.ceil(rect.height);
+    const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
 
-    // Create canvas over entire outer widget
     const ec = document.createElement('canvas');
     ec.id = 'explodeCanvas';
-    ec.width = W; ec.height = H;
-    ec.style.cssText = `position:fixed;top:${outerRect.top}px;left:${outerRect.left}px;width:${W}px;height:${H}px;pointer-events:none;z-index:9999;`;
+    ec.width = Math.ceil(W * dpr);
+    ec.height = Math.ceil(H * dpr);
+    ec.style.cssText = `position:fixed;top:${rect.top}px;left:${rect.left}px;width:${W}px;height:${H}px;pointer-events:none;z-index:9999;`;
     document.body.appendChild(ec);
+
     const ectx = ec.getContext('2d');
+    ectx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    // Hide widget content
-    col.style.opacity = '0';
+    const originalVisibility = outerEl.style.visibility;
+    const originalFilter = outerEl.style.filter;
+    const originalTransform = outerEl.style.transform;
 
-    // Generate shards — irregular polygons covering the widget area
-    const shards = [];
-    const cols = 6, rows = 8;
-    const sw = W / cols, sh = H / rows;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const cx = (c + 0.5) * sw, cy = (r + 0.5) * sh;
-        // Irregular polygon around cell center
-        const pts = [];
-        const n = 4 + Math.floor(Math.random() * 3);
-        for (let i = 0; i < n; i++) {
-          const a = (i / n) * Math.PI * 2 + Math.random() * 0.4;
-          const rad = (Math.min(sw, sh) * 0.5) * (0.7 + Math.random() * 0.4);
-          pts.push({ x: cx + Math.cos(a) * rad, y: cy + Math.sin(a) * rad });
+    const centerX = W * 0.52;
+    const centerY = H * 0.58;
+    const gravity = 0.34;
+    const drag = 0.992;
+    const floor = H + 18;
+
+    function cssVar(name, fallback) {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      return v || fallback;
+    }
+
+    function pickElementColor(el) {
+      const cs = getComputedStyle(el);
+      if (cs.backgroundColor && cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'transparent') return cs.backgroundColor;
+      if (cs.borderColor && cs.borderColor !== 'rgba(0, 0, 0, 0)' && cs.borderColor !== 'transparent') return cs.borderColor;
+      return cssVar('--card', '#0a1628');
+    }
+
+    function addJaggedPiece(list, x, y, w, h, color, weight = 1) {
+      const cx = x + w / 2;
+      const cy = y + h / 2;
+      const dx = cx - centerX;
+      const dy = cy - centerY;
+      const dist = Math.max(20, Math.hypot(dx, dy));
+      const blast = 8 + Math.random() * 8;
+      const lift = 7 + Math.random() * 8;
+      const sides = 3 + Math.floor(Math.random() * 4);
+      const radiusX = w * (0.45 + Math.random() * 0.25);
+      const radiusY = h * (0.45 + Math.random() * 0.25);
+      const pts = [];
+
+      for (let i = 0; i < sides; i++) {
+        const a = (i / sides) * Math.PI * 2 + (Math.random() - 0.5) * 0.7;
+        const spike = 0.55 + Math.random() * 0.65;
+        pts.push({ x: Math.cos(a) * radiusX * spike, y: Math.sin(a) * radiusY * spike });
+      }
+
+      list.push({
+        x: cx,
+        y: cy,
+        vx: (dx / dist) * blast + (Math.random() - 0.5) * 7,
+        vy: (dy / dist) * blast - lift - Math.random() * 5,
+        rot: Math.random() * Math.PI * 2,
+        rv: (Math.random() - 0.5) * (0.22 + Math.random() * 0.18),
+        pts,
+        color,
+        edge: Math.random() < 0.28 ? cssVar('--accent2', '#f0d060') : 'rgba(255,255,255,0.18)',
+        alpha: 1,
+        weight,
+        shadow: 8 + Math.random() * 14,
+        settled: false,
+        bounce: 0.18 + Math.random() * 0.14
+      });
+    }
+
+    const debris = [];
+    const targetEls = [
+      ...outerEl.querySelectorAll('.sidebar,.banner,.shell,.right-panel,.stat,.dial-wrap,.topbar,.footer,.countdown-item,.slider-wrap')
+    ];
+
+    targetEls.forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.width < 4 || r.height < 4) return;
+      const x = r.left - rect.left;
+      const y = r.top - rect.top;
+      const color = pickElementColor(el);
+      const cell = el.classList.contains('shell') ? 22 : el.classList.contains('stat') ? 13 : 17;
+      const cols = Math.max(1, Math.ceil(r.width / cell));
+      const rows = Math.max(1, Math.ceil(r.height / cell));
+
+      for (let row = 0; row < rows; row++) {
+        for (let colIdx = 0; colIdx < cols; colIdx++) {
+          if (Math.random() < 0.07) continue;
+          const pw = r.width / cols;
+          const ph = r.height / rows;
+          addJaggedPiece(
+            debris,
+            x + colIdx * pw + Math.random() * 2,
+            y + row * ph + Math.random() * 2,
+            pw * (0.75 + Math.random() * 0.45),
+            ph * (0.75 + Math.random() * 0.45),
+            color,
+            0.8 + Math.random() * 0.9
+          );
         }
-        // Color: mix of navy and gold
-        const isGold = Math.random() < 0.25;
-        const color = isGold ? `rgba(201,168,76,${0.7 + Math.random()*0.3})` : `rgba(${10+Math.floor(Math.random()*20)},${22+Math.floor(Math.random()*20)},${40+Math.floor(Math.random()*20)},0.95)`;
-        const vx = (cx - W/2) * (0.04 + Math.random() * 0.08) + (Math.random()-0.5)*3;
-        const vy = (cy - H/2) * (0.04 + Math.random() * 0.08) - Math.random()*4;
-        shards.push({ pts, cx, cy, vx, vy, rot:0, rotV:(Math.random()-0.5)*0.15, color, opacity:1, settled:false, settleY: H - 20 - Math.random()*30 });
       }
+    });
+
+    // Extra metallic/gold fragments so the blast feels less like confetti and more like broken UI parts.
+    for (let i = 0; i < 46; i++) {
+      const size = 3 + Math.random() * 10;
+      addJaggedPiece(
+        debris,
+        centerX + (Math.random() - 0.5) * 70,
+        centerY + (Math.random() - 0.5) * 70,
+        size,
+        size * (0.55 + Math.random()),
+        Math.random() < 0.55 ? 'rgba(212,169,58,0.95)' : 'rgba(28,44,65,0.98)',
+        0.55
+      );
     }
 
-    const startTime = Date.now();
-    const explodeDur = 1200;  // explosion phase ms
-    const rubbleDur  = 3000;  // rubble sits ms
-    const fadeDur    = 800;   // fade back in ms
+    const sparks = Array.from({ length: 95 }, () => {
+      const a = Math.random() * Math.PI * 2;
+      const speed = 7 + Math.random() * 18;
+      return {
+        x: centerX + (Math.random() - 0.5) * 24,
+        y: centerY + (Math.random() - 0.5) * 18,
+        vx: Math.cos(a) * speed,
+        vy: Math.sin(a) * speed - Math.random() * 5,
+        life: 0.45 + Math.random() * 0.55,
+        decay: 0.012 + Math.random() * 0.018,
+        len: 6 + Math.random() * 16
+      };
+    });
 
-    function explodeLoop() {
-      const now = Date.now();
-      const elapsed = now - startTime;
+    const smoke = Array.from({ length: 42 }, () => ({
+      x: centerX + (Math.random() - 0.5) * 60,
+      y: centerY + (Math.random() - 0.5) * 35,
+      vx: (Math.random() - 0.5) * 1.8,
+      vy: -0.8 - Math.random() * 1.8,
+      r: 12 + Math.random() * 30,
+      grow: 0.45 + Math.random() * 0.7,
+      alpha: 0.22 + Math.random() * 0.18
+    }));
+
+    const start = performance.now();
+    const duration = 4200;
+    const hideAt = 120;
+    let hidden = false;
+
+    function drawFireball(t) {
+      const burst = Math.max(0, 1 - t / 0.32);
+      if (burst <= 0) return;
+
+      const grd = ectx.createRadialGradient(centerX, centerY, 4, centerX, centerY, 155 * (1 - burst * 0.1));
+      grd.addColorStop(0, `rgba(255,245,190,${0.95 * burst})`);
+      grd.addColorStop(0.22, `rgba(240,208,96,${0.72 * burst})`);
+      grd.addColorStop(0.55, `rgba(255,112,34,${0.48 * burst})`);
+      grd.addColorStop(1, 'rgba(10,10,10,0)');
+      ectx.fillStyle = grd;
+      ectx.beginPath();
+      ectx.arc(centerX, centerY, 160 * (1 - burst * 0.15), 0, Math.PI * 2);
+      ectx.fill();
+
+      ectx.strokeStyle = `rgba(245,225,140,${0.8 * burst})`;
+      ectx.lineWidth = 2 + 6 * burst;
+      ectx.beginPath();
+      ectx.arc(centerX, centerY, 60 + 210 * (1 - burst), 0, Math.PI * 2);
+      ectx.stroke();
+    }
+
+    function loop(now) {
+      const elapsed = now - start;
+      const t = Math.min(1, elapsed / duration);
+
+      if (!hidden && elapsed > hideAt) {
+        hidden = true;
+        outerEl.style.visibility = 'hidden';
+      } else if (!hidden) {
+        const shake = 1 - elapsed / hideAt;
+        outerEl.style.filter = `brightness(${1 + shake * 1.5})`;
+        outerEl.style.transform = `translate(${(Math.random() - 0.5) * 5 * shake}px, ${(Math.random() - 0.5) * 5 * shake}px)`;
+      }
+
       ectx.clearRect(0, 0, W, H);
+      drawFireball(t);
 
-      if (elapsed < explodeDur + rubbleDur) {
-        shards.forEach(s => {
-          if (elapsed < explodeDur) {
-            s.cx += s.vx;
-            s.cy += s.vy;
-            s.vy += 0.18; // gravity
-            s.rot += s.rotV;
-            if (s.cy > s.settleY) { s.cy = s.settleY; s.vy *= -0.15; s.rotV *= 0.5; }
-          }
-          ectx.save();
-          ectx.translate(s.cx, s.cy);
-          ectx.rotate(s.rot);
-          ectx.globalAlpha = s.opacity;
-          ectx.beginPath();
-          s.pts.forEach((p,i) => {
-            const lx = p.x - s.cx + (s.pts.reduce((a,b)=>a+b.x,0)/s.pts.length - s.cx) * 0;
-            const ly = p.y - s.cy;
-            i === 0 ? ectx.moveTo(p.x-s.cx, ly) : ectx.lineTo(p.x-s.cx, ly);
-          });
-          ectx.closePath();
-          ectx.fillStyle = s.color;
-          ectx.fill();
-          ectx.strokeStyle = 'rgba(201,168,76,0.3)';
-          ectx.lineWidth = 0.5;
+      smoke.forEach(s => {
+        s.x += s.vx;
+        s.y += s.vy;
+        s.r += s.grow;
+        s.alpha *= 0.987;
+        const grd = ectx.createRadialGradient(s.x, s.y, 1, s.x, s.y, s.r);
+        grd.addColorStop(0, `rgba(85,82,78,${s.alpha})`);
+        grd.addColorStop(0.65, `rgba(38,38,40,${s.alpha * 0.55})`);
+        grd.addColorStop(1, 'rgba(0,0,0,0)');
+        ectx.fillStyle = grd;
+        ectx.beginPath();
+        ectx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ectx.fill();
+      });
+
+      sparks.forEach(sp => {
+        if (sp.life <= 0) return;
+        sp.x += sp.vx;
+        sp.y += sp.vy;
+        sp.vy += gravity * 0.28;
+        sp.vx *= 0.985;
+        sp.vy *= 0.985;
+        sp.life -= sp.decay;
+        ectx.strokeStyle = `rgba(255,218,95,${Math.max(0, sp.life)})`;
+        ectx.lineWidth = 1.2;
+        ectx.beginPath();
+        ectx.moveTo(sp.x, sp.y);
+        ectx.lineTo(sp.x - sp.vx * 0.42, sp.y - sp.vy * 0.42);
+        ectx.stroke();
+      });
+
+      debris.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= drag;
+        p.vy = p.vy * drag + gravity * p.weight;
+        p.rot += p.rv;
+
+        if (p.y > floor) {
+          p.y = floor;
+          p.vy *= -p.bounce;
+          p.vx *= 0.72;
+          p.rv *= 0.7;
+        }
+
+        if (t > 0.78) p.alpha = Math.max(0, 1 - (t - 0.78) / 0.22);
+
+        ectx.save();
+        ectx.translate(p.x, p.y);
+        ectx.rotate(p.rot);
+        ectx.globalAlpha = p.alpha;
+        ectx.shadowColor = 'rgba(0,0,0,0.55)';
+        ectx.shadowBlur = p.shadow;
+        ectx.beginPath();
+        p.pts.forEach((pt, i) => i ? ectx.lineTo(pt.x, pt.y) : ectx.moveTo(pt.x, pt.y));
+        ectx.closePath();
+        ectx.fillStyle = p.color;
+        ectx.fill();
+        ectx.shadowBlur = 0;
+        ectx.strokeStyle = p.edge;
+        ectx.lineWidth = 0.8;
+        ectx.stroke();
+
+        // Small highlight edge that gives pieces a thicker, broken-material look.
+        ectx.strokeStyle = 'rgba(255,255,255,0.14)';
+        ectx.lineWidth = 0.45;
+        ectx.beginPath();
+        if (p.pts.length > 1) {
+          ectx.moveTo(p.pts[0].x, p.pts[0].y);
+          ectx.lineTo(p.pts[1].x, p.pts[1].y);
           ectx.stroke();
-          ectx.restore();
-        });
-        requestAnimationFrame(explodeLoop);
+        }
+        ectx.restore();
+      });
+
+      if (elapsed < duration) {
+        requestAnimationFrame(loop);
       } else {
-        // Fade canvas out, fade widget back in
-        ectx.clearRect(0, 0, W, H);
         ec.remove();
-        col.style.transition = 'opacity 0.8s ease';
-        col.style.opacity = '1';
+        outerEl.style.visibility = originalVisibility;
+        outerEl.style.filter = originalFilter;
+        outerEl.style.transform = originalTransform;
+        outerEl.style.opacity = '0';
+        outerEl.style.transition = 'opacity 0.65s ease';
+        requestAnimationFrame(() => { outerEl.style.opacity = '1'; });
         setTimeout(() => {
-          col.style.transition = '';
+          outerEl.style.transition = '';
+          outerEl.style.opacity = '';
           detonateBtn.disabled = false;
-        }, fadeDur);
+        }, 700);
       }
     }
 
-    requestAnimationFrame(explodeLoop);
+    requestAnimationFrame(loop);
   }
 
   detonateBtn.addEventListener('click', detonate);
