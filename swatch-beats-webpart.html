@@ -247,12 +247,142 @@
   .rp-divider { width:20px; height:1px; background:var(--border); flex-shrink:0; }
   .footer-note { font-family:var(--mono); font-size:9px; color:var(--muted); letter-spacing:1.5px; }
   .footer-date { font-family:var(--mono); font-size:11px; color:var(--accent2); letter-spacing:2px; font-weight:bold; }
+  .footer {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    min-height:20px;
+    position:relative;
+    padding-right:38px;
+  }
+
+
+  /* Chaos tool menu */
+  .shell { position:relative; }
+  #chaosCanvas {
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    pointer-events:none;
+    border-radius:4px;
+    z-index:12;
+  }
+  .chaos-menu {
+    position:absolute;
+    right:8px;
+    bottom:8px;
+    z-index:20;
+    display:flex;
+    align-items:flex-end;
+    justify-content:flex-end;
+  }
+  .chaos-toggle {
+    width:26px;
+    height:24px;
+    border:1px solid rgba(212,169,58,0.55);
+    border-radius:4px;
+    background:linear-gradient(180deg, rgba(10,22,40,0.96), rgba(7,16,32,0.92));
+    color:var(--accent2);
+    cursor:pointer;
+    box-shadow:0 0 8px rgba(212,169,58,0.12);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    transition:border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease;
+  }
+  .chaos-toggle .bar {
+    display:block;
+    width:12px;
+    height:1.5px;
+    border-radius:2px;
+    background:currentColor;
+    margin:1.7px 0;
+    box-shadow:0 0 4px rgba(212,169,58,0.22);
+    transition:transform 0.18s ease, opacity 0.18s ease;
+  }
+  .chaos-toggle:hover,
+  .chaos-toggle.active {
+    color:#fff0a0;
+    border-color:var(--accent2);
+    box-shadow:0 0 12px rgba(212,169,58,0.35);
+    transform:translateY(-1px);
+  }
+  .chaos-toggle.active .bar:nth-child(1) { transform:translateY(5px) rotate(45deg); }
+  .chaos-toggle.active .bar:nth-child(2) { opacity:0; }
+  .chaos-toggle.active .bar:nth-child(3) { transform:translateY(-5px) rotate(-45deg); }
+  .chaos-tools {
+    position:absolute;
+    right:0;
+    bottom:30px;
+    display:none;
+    flex-direction:column;
+    gap:4px;
+    padding:6px;
+    border:1px solid rgba(212,169,58,0.35);
+    border-radius:6px;
+    background:rgba(7,16,32,0.96);
+    backdrop-filter:blur(4px);
+    box-shadow:0 10px 22px rgba(0,0,0,0.38), 0 0 12px rgba(212,169,58,0.08);
+    transform-origin:bottom right;
+    min-width:110px;
+  }
+  .chaos-menu.open .chaos-tools { display:flex; animation: chaos-pop 0.16s ease-out; }
+  @keyframes chaos-pop {
+    from { opacity:0; transform:translateY(4px) scale(0.96); }
+    to { opacity:1; transform:translateY(0) scale(1); }
+  }
+  .chaos-tool {
+    min-width:96px;
+    height:23px;
+    border:1px solid rgba(30,48,72,0.95);
+    border-radius:4px;
+    background:rgba(10,22,40,0.95);
+    color:var(--muted);
+    font-family:var(--mono);
+    font-size:9px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    cursor:pointer;
+    text-align:left;
+    padding:0 7px;
+  }
+  .chaos-tool:hover,
+  .chaos-tool.active {
+    color:var(--accent2);
+    border-color:rgba(212,169,58,0.65);
+    background:rgba(201,168,76,0.08);
+  }
+  .chaos-hint {
+    min-width:96px;
+    text-align:center;
+    font-family:var(--mono);
+    font-size:7px;
+    letter-spacing:1px;
+    color:var(--muted);
+    opacity:0.75;
+    text-transform:uppercase;
+  }
+  body.chaos-hammer .outer,
+  body.chaos-blaster .outer,
+  body.chaos-bomb .outer,
+  body.chaos-magnet .outer { cursor:crosshair; }
+  .outer.impact-shake { animation: impact-shake 0.26s linear; }
+  @keyframes impact-shake {
+    0%,100% { transform:translate(0,0) rotate(0deg); }
+    20% { transform:translate(-2px,1px) rotate(-0.25deg); }
+    40% { transform:translate(2px,-1px) rotate(0.25deg); }
+    60% { transform:translate(-1px,-2px) rotate(0.18deg); }
+    80% { transform:translate(1px,2px) rotate(-0.18deg); }
+  }
+
 </style>
 </head>
 <body>
 <div class="outer">
   <canvas id="fxCanvas"></canvas>
   <canvas id="orbitCanvas"></canvas>
+  <canvas id="chaosCanvas"></canvas>
 
   <!-- Sidebar -->
   <div class="sidebar">
@@ -348,6 +478,19 @@
           padding:0;text-transform:uppercase;opacity:0.6;
           transition:color 0.2s,opacity 0.2s;
         " title="🔴 Do not press">💥</button>
+      </div>
+
+      <div class="chaos-menu" id="chaosMenu">
+        <div class="chaos-tools" id="chaosTools">
+          <button class="chaos-tool" data-tool="hammer">🔨 Hammer</button>
+          <button class="chaos-tool" data-tool="blaster">⚡ Blaster</button>
+          <button class="chaos-tool" data-tool="bomb">🧨 Small boom</button>
+          <button class="chaos-tool" data-tool="magnet">🧲 Magnet</button>
+          <button class="chaos-tool" data-tool="reset">🧹 Reset</button>
+          <button class="chaos-tool" data-tool="detonate">💣 Do not press</button>
+          <div class="chaos-hint" id="chaosHint">pick a tool</div>
+        </div>
+        <button class="chaos-toggle" id="chaosToggle" title="Chaos tools" aria-label="Chaos tools"><span><span class="bar"></span><span class="bar"></span><span class="bar"></span></span></button>
       </div>
     </div>
 
@@ -969,6 +1112,302 @@
   setTimeout(matchPanelHeights, 300);
   setTimeout(matchPanelHeights, 800);
   window.addEventListener('resize', matchPanelHeights);
+
+
+
+  // ---- Chaos tool menu ----
+  const chaosCanvas = document.getElementById('chaosCanvas');
+  const chaosCtx = chaosCanvas.getContext('2d');
+  const chaosMenu = document.getElementById('chaosMenu');
+  const chaosToggle = document.getElementById('chaosToggle');
+  const chaosHint = document.getElementById('chaosHint');
+  const chaosToolButtons = [...document.querySelectorAll('.chaos-tool')];
+  let activeChaosTool = null;
+  let chaosParticles = [];
+  let chaosCracks = [];
+  let chaosAnimating = false;
+
+  function resizeChaosCanvas() {
+    chaosCanvas.width = outerEl.offsetWidth;
+    chaosCanvas.height = outerEl.offsetHeight;
+  }
+  resizeChaosCanvas();
+  setTimeout(resizeChaosCanvas, 500);
+  setTimeout(resizeChaosCanvas, 1500);
+  window.addEventListener('resize', resizeChaosCanvas);
+
+  chaosToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    chaosMenu.classList.toggle('open');
+    chaosToggle.classList.toggle('active', chaosMenu.classList.contains('open'));
+  });
+
+  function setChaosTool(tool) {
+    document.body.classList.remove('chaos-hammer','chaos-blaster','chaos-bomb','chaos-magnet');
+    chaosToolButtons.forEach(b => b.classList.remove('active'));
+
+    if (tool === 'reset') {
+      activeChaosTool = null;
+      chaosParticles = [];
+      chaosCracks = [];
+      chaosCtx.clearRect(0,0,chaosCanvas.width,chaosCanvas.height);
+      chaosHint.textContent = 'reset';
+      return;
+    }
+    if (tool === 'detonate') {
+      activeChaosTool = null;
+      chaosMenu.classList.remove('open');
+      chaosToggle.classList.remove('active');
+      detonate();
+      return;
+    }
+
+    activeChaosTool = tool;
+    const btn = chaosToolButtons.find(b => b.dataset.tool === tool);
+    if (btn) btn.classList.add('active');
+    document.body.classList.add('chaos-' + tool);
+    chaosHint.textContent = 'click widget';
+  }
+
+  chaosToolButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setChaosTool(btn.dataset.tool);
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!chaosMenu.contains(e.target) && chaosMenu.classList.contains('open')) {
+      chaosMenu.classList.remove('open');
+      chaosToggle.classList.remove('active');
+    }
+  });
+
+  function chaosPoint(evt) {
+    const r = outerEl.getBoundingClientRect();
+    return { x: evt.clientX - r.left, y: evt.clientY - r.top };
+  }
+
+  function shakeImpact(strength = 1) {
+    outerEl.classList.remove('impact-shake');
+    void outerEl.offsetWidth;
+    outerEl.style.setProperty('--impact-strength', strength);
+    outerEl.classList.add('impact-shake');
+    setTimeout(() => outerEl.classList.remove('impact-shake'), 280);
+  }
+
+  function addChunk(x, y, color, count, power) {
+    for (let i = 0; i < count; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const sp = power * (0.45 + Math.random());
+      const size = 2 + Math.random() * 7;
+      const sides = 3 + Math.floor(Math.random() * 4);
+      const pts = [];
+      for (let j = 0; j < sides; j++) {
+        const pa = (j / sides) * Math.PI * 2 + (Math.random() - 0.5) * 0.65;
+        const pr = size * (0.55 + Math.random() * 0.75);
+        pts.push({x: Math.cos(pa) * pr, y: Math.sin(pa) * pr});
+      }
+      chaosParticles.push({
+        kind:'chunk', x, y,
+        vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - Math.random()*3,
+        rot:Math.random()*Math.PI*2, rv:(Math.random()-0.5)*0.35,
+        pts, color, alpha:1, life:1,
+        gravity:0.18 + Math.random()*0.1
+      });
+    }
+  }
+
+  function addSparks(x, y, count, power) {
+    for (let i = 0; i < count; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const sp = power * (0.5 + Math.random());
+      chaosParticles.push({
+        kind:'spark', x, y,
+        vx:Math.cos(a)*sp, vy:Math.sin(a)*sp,
+        alpha:1, life:0.45 + Math.random()*0.45,
+        len:5 + Math.random()*13
+      });
+    }
+  }
+
+  function addSmoke(x, y, count, power) {
+    for (let i = 0; i < count; i++) {
+      chaosParticles.push({
+        kind:'smoke', x:x+(Math.random()-0.5)*10, y:y+(Math.random()-0.5)*10,
+        vx:(Math.random()-0.5)*power*0.18, vy:-0.35-Math.random()*0.8,
+        r:5 + Math.random()*12, grow:0.35 + Math.random()*0.45,
+        alpha:0.22 + Math.random()*0.12, life:1
+      });
+    }
+  }
+
+  function addRing(x, y, maxR, color) {
+    chaosParticles.push({ kind:'ring', x, y, r:2, maxR, color, alpha:0.9, life:1 });
+  }
+
+  function addCrack(x, y, arms, length) {
+    const lines = [];
+    for (let i = 0; i < arms; i++) {
+      let a = (i / arms) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
+      let px = x, py = y;
+      const segs = 2 + Math.floor(Math.random()*3);
+      const pts = [{x:px, y:py}];
+      for (let s = 0; s < segs; s++) {
+        const step = length / segs * (0.65 + Math.random()*0.55);
+        a += (Math.random() - 0.5) * 0.55;
+        px += Math.cos(a) * step;
+        py += Math.sin(a) * step;
+        pts.push({x:px, y:py});
+      }
+      lines.push(pts);
+    }
+    chaosCracks.push({ lines, alpha:0.75, life:1 });
+    if (chaosCracks.length > 12) chaosCracks.shift();
+  }
+
+  function addMagnetBits(x, y) {
+    for (let i = 0; i < 28; i++) {
+      const sx = Math.random()*chaosCanvas.width;
+      const sy = Math.random()*chaosCanvas.height;
+      chaosParticles.push({
+        kind:'magnet', x:sx, y:sy, tx:x, ty:y,
+        vx:(Math.random()-0.5)*2, vy:(Math.random()-0.5)*2,
+        r:2 + Math.random()*4,
+        color:Math.random() > 0.45 ? 'rgba(212,169,58,0.95)' : 'rgba(154,184,208,0.8)',
+        alpha:1, life:1, orbit:Math.random()*Math.PI*2
+      });
+    }
+  }
+
+  function runChaosTool(evt) {
+    if (!activeChaosTool || chaosMenu.contains(evt.target)) return;
+    if (!outerEl.contains(evt.target)) return;
+    evt.preventDefault();
+    resizeChaosCanvas();
+    const {x, y} = chaosPoint(evt);
+
+    if (activeChaosTool === 'hammer') {
+      shakeImpact(1.1);
+      addRing(x, y, 30, 'rgba(240,208,96,0.85)');
+      addCrack(x, y, 5, 18 + Math.random()*16);
+      addChunk(x, y, 'rgba(12,25,44,0.98)', 16, 5);
+      addSparks(x, y, 12, 7);
+    }
+    if (activeChaosTool === 'blaster') {
+      shakeImpact(0.7);
+      addRing(x, y, 22, 'rgba(255,160,55,0.9)');
+      addCrack(x, y, 3, 10 + Math.random()*10);
+      addSparks(x, y, 32, 10);
+      addSmoke(x, y, 7, 6);
+    }
+    if (activeChaosTool === 'bomb') {
+      shakeImpact(1.5);
+      addRing(x, y, 58, 'rgba(255,220,110,0.9)');
+      addCrack(x, y, 8, 28 + Math.random()*24);
+      addChunk(x, y, 'rgba(12,25,44,0.98)', 30, 8);
+      addChunk(x, y, 'rgba(212,169,58,0.9)', 18, 10);
+      addSparks(x, y, 54, 13);
+      addSmoke(x, y, 18, 8);
+    }
+    if (activeChaosTool === 'magnet') {
+      addRing(x, y, 42, 'rgba(154,184,208,0.65)');
+      addMagnetBits(x, y);
+    }
+
+    startChaosLoop();
+  }
+
+  outerEl.addEventListener('click', runChaosTool, true);
+
+  function drawChaos() {
+    chaosCtx.clearRect(0, 0, chaosCanvas.width, chaosCanvas.height);
+
+    chaosCracks.forEach(c => {
+      chaosCtx.save();
+      chaosCtx.globalAlpha = c.alpha;
+      c.lines.forEach(line => {
+        chaosCtx.beginPath();
+        line.forEach((pt, i) => i ? chaosCtx.lineTo(pt.x, pt.y) : chaosCtx.moveTo(pt.x, pt.y));
+        chaosCtx.strokeStyle = 'rgba(1,6,12,0.95)';
+        chaosCtx.lineWidth = 2.2;
+        chaosCtx.stroke();
+        chaosCtx.strokeStyle = 'rgba(240,208,96,0.35)';
+        chaosCtx.lineWidth = 0.7;
+        chaosCtx.stroke();
+      });
+      chaosCtx.restore();
+    });
+
+    chaosParticles.forEach(p => {
+      if (p.kind === 'chunk') {
+        p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.vx *= 0.985; p.vy *= 0.985; p.rot += p.rv; p.life -= 0.012; p.alpha = Math.max(0, p.life);
+        chaosCtx.save();
+        chaosCtx.translate(p.x, p.y); chaosCtx.rotate(p.rot); chaosCtx.globalAlpha = p.alpha;
+        chaosCtx.beginPath();
+        p.pts.forEach((pt, i) => i ? chaosCtx.lineTo(pt.x, pt.y) : chaosCtx.moveTo(pt.x, pt.y));
+        chaosCtx.closePath();
+        chaosCtx.fillStyle = p.color; chaosCtx.fill();
+        chaosCtx.strokeStyle = 'rgba(255,255,255,0.16)'; chaosCtx.lineWidth = 0.6; chaosCtx.stroke();
+        chaosCtx.restore();
+      }
+      if (p.kind === 'spark') {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.vx *= 0.98; p.vy *= 0.98; p.life -= 0.025; p.alpha = Math.max(0, p.life);
+        chaosCtx.strokeStyle = `rgba(255,218,95,${p.alpha})`;
+        chaosCtx.lineWidth = 1.1;
+        chaosCtx.beginPath();
+        chaosCtx.moveTo(p.x, p.y);
+        chaosCtx.lineTo(p.x - p.vx * 0.55, p.y - p.vy * 0.55);
+        chaosCtx.stroke();
+      }
+      if (p.kind === 'smoke') {
+        p.x += p.vx; p.y += p.vy; p.r += p.grow; p.life -= 0.01; p.alpha *= 0.985;
+        const g = chaosCtx.createRadialGradient(p.x,p.y,1,p.x,p.y,p.r);
+        g.addColorStop(0, `rgba(70,72,78,${p.alpha})`);
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        chaosCtx.fillStyle = g; chaosCtx.beginPath(); chaosCtx.arc(p.x,p.y,p.r,0,Math.PI*2); chaosCtx.fill();
+      }
+      if (p.kind === 'ring') {
+        p.r += (p.maxR - p.r) * 0.2; p.life -= 0.04; p.alpha = Math.max(0, p.life);
+        chaosCtx.strokeStyle = p.color.replace(/,0\.?\d+\)/, `,${p.alpha})`);
+        chaosCtx.lineWidth = 2;
+        chaosCtx.beginPath(); chaosCtx.arc(p.x,p.y,p.r,0,Math.PI*2); chaosCtx.stroke();
+      }
+      if (p.kind === 'magnet') {
+        const dx = p.tx - p.x, dy = p.ty - p.y;
+        p.vx += dx * 0.012; p.vy += dy * 0.012;
+        p.vx *= 0.88; p.vy *= 0.88;
+        p.orbit += 0.22;
+        p.x += p.vx + Math.cos(p.orbit) * 0.8;
+        p.y += p.vy + Math.sin(p.orbit) * 0.8;
+        p.life -= 0.012; p.alpha = Math.max(0, p.life);
+        chaosCtx.globalAlpha = p.alpha;
+        chaosCtx.fillStyle = p.color;
+        chaosCtx.beginPath(); chaosCtx.arc(p.x,p.y,p.r,0,Math.PI*2); chaosCtx.fill();
+        chaosCtx.globalAlpha = 1;
+      }
+    });
+
+    chaosParticles = chaosParticles.filter(p => (p.life ?? 0) > 0 && p.alpha > 0.01);
+    chaosCracks.forEach(c => { c.life -= 0.002; c.alpha = Math.max(0.18, c.life); });
+    chaosCracks = chaosCracks.filter(c => c.life > -8);
+  }
+
+  function chaosLoop() {
+    drawChaos();
+    if (chaosParticles.length || chaosCracks.length) {
+      requestAnimationFrame(chaosLoop);
+    } else {
+      chaosAnimating = false;
+      chaosCtx.clearRect(0,0,chaosCanvas.width,chaosCanvas.height);
+    }
+  }
+
+  function startChaosLoop() {
+    if (chaosAnimating) return;
+    chaosAnimating = true;
+    requestAnimationFrame(chaosLoop);
+  }
 
   // ---- Explosion effect ----
   const detonateBtn = document.getElementById('detonateBtn');
