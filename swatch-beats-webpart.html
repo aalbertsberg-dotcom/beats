@@ -477,7 +477,7 @@
           color:var(--muted);background:none;border:none;cursor:pointer;
           padding:0;text-transform:uppercase;opacity:0.6;
           transition:color 0.2s,opacity 0.2s;
-        " title="🔴 Do not press">💥</button>
+        " title="🔴 Do not press">💥 <span id="explodeCount">x0</span></button>
       </div>
 
       <div class="chaos-menu" id="chaosMenu">
@@ -1487,11 +1487,20 @@
   }
 
   // ---- Explosion effect ----
-  const detonateBtn = document.getElementById('detonateBtn');
+  const detonateBtn  = document.getElementById('detonateBtn');
+  const explodeCount = document.getElementById('explodeCount');
+
+  let blastCount = parseInt(localStorage.getItem('gwBlastCount') || '0');
+  explodeCount.textContent = 'x' + blastCount;
 
   function detonate() {
     if (document.getElementById('explodeCanvas')) return;
     detonateBtn.disabled = true;
+
+    // Increment and save count
+    blastCount++;
+    localStorage.setItem('gwBlastCount', blastCount);
+    explodeCount.textContent = 'x' + blastCount;
 
     const rect = outerEl.getBoundingClientRect();
     const W = Math.ceil(rect.width);
