@@ -487,7 +487,6 @@
           <button class="chaos-tool" data-tool="bomb">🧨 Small boom</button>
           <button class="chaos-tool" data-tool="magnet">🧲 Magnet</button>
           <button class="chaos-tool" data-tool="reset">🧹 Reset</button>
-          <div class="chaos-hint" id="chaosHint">pick a tool</div>
         </div>
         <button class="chaos-toggle" id="chaosToggle" title="Chaos tools" aria-label="Chaos tools"><span><span class="bar"></span><span class="bar"></span><span class="bar"></span></span></button>
       </div>
@@ -1150,7 +1149,7 @@
       chaosParticles = [];
       chaosCracks = [];
       chaosCtx.clearRect(0,0,chaosCanvas.width,chaosCanvas.height);
-      chaosHint.textContent = 'reset';
+      if (chaosHint) chaosHint.textContent = 'reset';
       return;
     }
     if (tool === 'detonate') {
@@ -1165,7 +1164,7 @@
     const btn = chaosToolButtons.find(b => b.dataset.tool === tool);
     if (btn) btn.classList.add('active');
     document.body.classList.add('chaos-' + tool);
-    chaosHint.textContent = 'click widget';
+    if (chaosHint) chaosHint.textContent = 'click widget';
   }
 
   chaosToolButtons.forEach(btn => {
