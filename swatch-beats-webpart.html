@@ -257,124 +257,103 @@
   }
 
 
-  /* Chaos tool menu */
-  .shell { position:relative; }
-  #chaosCanvas {
-    position:absolute;
-    top:0; left:0;
-    width:100%; height:100%;
-    pointer-events:none;
-    border-radius:4px;
-    z-index:12;
-  }
-  .chaos-menu {
-    position:absolute;
-    right:8px;
-    bottom:8px;
-    z-index:20;
+  .footer {
     display:flex;
-    align-items:flex-end;
-    justify-content:flex-end;
-  }
-  .chaos-toggle {
-    width:26px;
-    height:24px;
-    border:1px solid rgba(212,169,58,0.55);
-    border-radius:4px;
-    background:linear-gradient(180deg, rgba(10,22,40,0.96), rgba(7,16,32,0.92));
-    color:var(--accent2);
-    cursor:pointer;
-    box-shadow:0 0 8px rgba(212,169,58,0.12);
-    display:inline-flex;
     align-items:center;
-    justify-content:center;
-    padding:0;
-    transition:border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, background 0.18s ease;
+    justify-content:space-between;
+    min-height:20px;
   }
-  .chaos-toggle .bar {
-    display:block;
-    width:12px;
-    height:1.5px;
-    border-radius:2px;
-    background:currentColor;
-    margin:1.7px 0;
-    box-shadow:0 0 4px rgba(212,169,58,0.22);
-    transition:transform 0.18s ease, opacity 0.18s ease;
-  }
-  .chaos-toggle:hover,
-  .chaos-toggle.active {
-    color:#fff0a0;
-    border-color:var(--accent2);
-    box-shadow:0 0 12px rgba(212,169,58,0.35);
-    transform:translateY(-1px);
-  }
-  .chaos-toggle.active .bar:nth-child(1) { transform:translateY(5px) rotate(45deg); }
-  .chaos-toggle.active .bar:nth-child(2) { opacity:0; }
-  .chaos-toggle.active .bar:nth-child(3) { transform:translateY(-5px) rotate(-45deg); }
-  .chaos-tools {
-    position:absolute;
-    right:0;
-    bottom:30px;
-    display:none;
-    flex-direction:column;
-    gap:4px;
-    padding:6px;
-    border:1px solid rgba(212,169,58,0.35);
-    border-radius:6px;
-    background:rgba(7,16,32,0.96);
-    backdrop-filter:blur(4px);
-    box-shadow:0 10px 22px rgba(0,0,0,0.38), 0 0 12px rgba(212,169,58,0.08);
-    transform-origin:bottom right;
-    min-width:110px;
-  }
-  .chaos-menu.open .chaos-tools { display:flex; animation: chaos-pop 0.16s ease-out; }
-  @keyframes chaos-pop {
-    from { opacity:0; transform:translateY(4px) scale(0.96); }
-    to { opacity:1; transform:translateY(0) scale(1); }
-  }
-  .chaos-tool {
-    min-width:96px;
-    height:23px;
-    border:1px solid rgba(30,48,72,0.95);
+
+
+
+
+  /* Internal Beats Tools view - SharePoint friendly, no popups */
+  .view { display:block; }
+  .view.hidden { display:none; }
+  .mini-btn {
+    border:1px solid rgba(212,169,58,0.45);
     border-radius:4px;
-    background:rgba(10,22,40,0.95);
-    color:var(--muted);
-    font-family:var(--mono);
-    font-size:9px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    cursor:pointer;
-    text-align:left;
-    padding:0 7px;
-  }
-  .chaos-tool:hover,
-  .chaos-tool.active {
+    background:rgba(201,168,76,0.06);
     color:var(--accent2);
-    border-color:rgba(212,169,58,0.65);
-    background:rgba(201,168,76,0.08);
+    font-family:var(--mono);
+    font-size:8px;
+    letter-spacing:1.4px;
+    text-transform:uppercase;
+    padding:4px 6px;
+    cursor:pointer;
+    line-height:1;
   }
-  .chaos-hint {
-    min-width:96px;
-    text-align:center;
+  .mini-btn:hover { border-color:var(--accent2); background:rgba(201,168,76,0.12); color:var(--text2); }
+  .tools-view { min-height:259px; }
+  .tools-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .tools-title { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
+  .tool-tabs { display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:6px; }
+  .tool-tab {
+    border:1px solid var(--border);
+    border-radius:3px;
+    background:rgba(201,168,76,0.04);
+    color:var(--muted);
+    font-family:var(--display);
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    padding:5px 0;
+    cursor:pointer;
+  }
+  .tool-tab.active { color:var(--accent2); border-color:rgba(201,168,76,0.55); background:rgba(201,168,76,0.10); }
+  .tool-panel.hidden { display:none; }
+  .convert-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
+  .convert-card, .explore-card {
+    border:1px solid var(--border);
+    border-radius:3px;
+    background:rgba(201,168,76,0.035);
+    padding:6px;
+    min-width:0;
+  }
+  .convert-card.wide { grid-column:1 / -1; }
+  .convert-label, .explore-label {
     font-family:var(--mono);
     font-size:7px;
     letter-spacing:1px;
     color:var(--muted);
-    opacity:0.75;
     text-transform:uppercase;
+    margin-bottom:4px;
   }
-  body.chaos-hammer .outer,
-  body.chaos-blaster .outer,
-  body.chaos-bomb .outer,
-  body.chaos-magnet .outer { cursor:crosshair; }
-  .outer.impact-shake { animation: impact-shake 0.26s linear; }
-  @keyframes impact-shake {
-    0%,100% { transform:translate(0,0) rotate(0deg); }
-    20% { transform:translate(-2px,1px) rotate(-0.25deg); }
-    40% { transform:translate(2px,-1px) rotate(0.25deg); }
-    60% { transform:translate(-1px,-2px) rotate(0.18deg); }
-    80% { transform:translate(1px,2px) rotate(-0.18deg); }
+  .convert-row { display:flex; align-items:center; gap:5px; margin-bottom:5px; }
+  .convert-row input, .convert-row select {
+    width:100%;
+    min-width:0;
+    border:1px solid var(--border);
+    border-radius:3px;
+    background:#071020;
+    color:var(--text2);
+    font-family:var(--mono);
+    font-size:10px;
+    padding:5px;
+    outline:none;
   }
+  .convert-row input[type="number"] { max-width:76px; }
+  .convert-result {
+    border-top:1px solid var(--border);
+    padding-top:5px;
+    font-family:var(--mono);
+    font-size:14px;
+    color:var(--accent2);
+    line-height:1.1;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .convert-result .approx { color:var(--muted); font-size:10px; }
+  .explore-big { text-align:center; font-family:var(--mono); font-size:28px; color:var(--accent2); text-shadow:0 0 16px var(--glow); line-height:1; margin:4px 0 8px; }
+  .explore-scale { display:flex; justify-content:space-between; font-family:var(--mono); font-size:7px; color:var(--muted); letter-spacing:1px; margin:0 2px 2px; }
+  .beat-range { width:100%; accent-color:var(--accent2); margin:0 0 7px; }
+  .zone-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
+  .zone-card { display:flex; align-items:center; justify-content:space-between; gap:6px; border:1px solid var(--border); border-radius:3px; background:rgba(201,168,76,0.04); padding:5px 6px; min-width:0; }
+  .zone-name { font-family:var(--display); font-size:10px; font-weight:700; letter-spacing:1px; color:var(--text2); text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .zone-time { font-family:var(--mono); font-size:13px; color:var(--accent2); white-space:nowrap; }
+  .tools-note { font-family:var(--mono); font-size:7px; letter-spacing:1px; color:var(--muted); text-align:center; margin-top:5px; text-transform:uppercase; opacity:.85; }
 
 </style>
 </head>
@@ -382,7 +361,6 @@
 <div class="outer">
   <canvas id="fxCanvas"></canvas>
   <canvas id="orbitCanvas"></canvas>
-  <canvas id="chaosCanvas"></canvas>
 
   <!-- Sidebar -->
   <div class="sidebar">
@@ -418,80 +396,143 @@
 
     <!-- Widget -->
     <div class="shell">
-      <div class="topbar">
-        <span class="brand">Internet Time</span>
-        <span class="live-logo">
-          <svg width="14" height="14" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="50,8 58,32 84,32 63,49 71,73 50,57 29,73 37,49 16,32 42,32" fill="#c9a84c"/>
+      <div class="view clock-view" id="clockView">
+        <div class="topbar">
+          <span class="brand">Internet Time</span>
+          <span class="live-logo">
+            <svg width="14" height="14" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="50,8 58,32 84,32 63,49 71,73 50,57 29,73 37,49 16,32 42,32" fill="#c9a84c"/>
+            </svg>
+          </span>
+        </div>
+
+        <div class="dial-wrap" id="dialWrap">
+          <svg class="dial-svg" id="dialSvg" viewBox="0 0 190 190" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop id="arcStop1" offset="0%" style="stop-color:#8a5e0a"/>
+                <stop id="arcStop2" offset="100%" style="stop-color:#c9a84c"/>
+              </linearGradient>
+            </defs>
+            <g id="ticks"></g>
+            <circle class="track" cx="95" cy="95" r="88"/>
+            <circle class="progress" id="arc" cx="95" cy="95" r="88" stroke-dasharray="552.92" stroke-dashoffset="552.92"/>
+            <circle cx="95" cy="95" r="95" fill="transparent"/>
+            <circle id="handle" cx="95" cy="7" r="7"
+              fill="#c9a84c" stroke="#071020" stroke-width="2"
+              style="filter:drop-shadow(0 0 5px rgba(201,168,76,0.9))"/>
           </svg>
-        </span>
-      </div>
+          <div class="center-readout">
+            <span class="beat-label" id="centerLabel">@ beats</span>
+            <span class="beat-value" id="beatNum">000</span>
+            <span class="beat-frac" id="beatFrac">.00</span>
+          </div>
+        </div>
 
-      <div class="dial-wrap" id="dialWrap">
-        <svg class="dial-svg" id="dialSvg" viewBox="0 0 190 190" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop id="arcStop1" offset="0%" style="stop-color:#8a5e0a"/>
-              <stop id="arcStop2" offset="100%" style="stop-color:#c9a84c"/>
-            </linearGradient>
-          </defs>
-          <g id="ticks"></g>
-          <circle class="track" cx="95" cy="95" r="88"/>
-          <circle class="progress" id="arc" cx="95" cy="95" r="88" stroke-dasharray="552.92" stroke-dashoffset="552.92"/>
-          <circle cx="95" cy="95" r="95" fill="transparent"/>
-          <circle id="handle" cx="95" cy="7" r="7"
-            fill="#c9a84c" stroke="#071020" stroke-width="2"
-            style="filter:drop-shadow(0 0 5px rgba(201,168,76,0.9))"/>
-        </svg>
-        <div class="center-readout">
-          <span class="beat-label" id="centerLabel">@ beats</span>
-          <span class="beat-value" id="beatNum">000</span>
-          <span class="beat-frac" id="beatFrac">.00</span>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-val" id="statRemain">1000</div>
+            <div class="stat-lbl">Remain</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val">86.4s</div>
+            <div class="stat-lbl">/ Beat</div>
+          </div>
+          <div class="stat">
+            <div class="stat-val" id="statLocal">--:--</div>
+            <div class="stat-lbl">Local</div>
+          </div>
+          <div class="stat conv-stat" id="convStat">
+            <div class="stat-val" id="convVal">--:--</div>
+            <div class="stat-lbl" id="convLbl">@ ?</div>
+            <div class="conv-hint-text">drag dial</div>
+          </div>
         </div>
-      </div>
 
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-val" id="statRemain">1000</div>
-          <div class="stat-lbl">Remain</div>
-        </div>
-        <div class="stat">
-          <div class="stat-val">86.4s</div>
-          <div class="stat-lbl">/ Beat</div>
-        </div>
-        <div class="stat">
-          <div class="stat-val" id="statLocal">--:--</div>
-          <div class="stat-lbl">Local</div>
-        </div>
-        <div class="stat conv-stat" id="convStat">
-          <div class="stat-val" id="convVal">--:--</div>
-          <div class="stat-lbl" id="convLbl">@ ?</div>
-          <div class="conv-hint-text">drag dial</div>
+        <div class="footer">
+          <span class="footer-date" id="footerDate">--</span>
+          <button class="mini-btn" id="openToolsBtn" type="button">@ Tools</button>
         </div>
       </div>
 
-      <div class="footer">
-        <span class="footer-date" id="footerDate">--</span>
-        <button id="detonateBtn" style="
-          font-family:var(--mono);font-size:9px;letter-spacing:1.5px;
-          color:var(--muted);background:none;border:none;cursor:pointer;
-          padding:0;text-transform:uppercase;opacity:0.6;
-          transition:color 0.2s,opacity 0.2s;
-        " title="🔴 Do not press">💥 <span id="explodeCount">x0</span></button>
-      </div>
-
-      <div class="chaos-menu" id="chaosMenu">
-        <div class="chaos-tools" id="chaosTools">
-          <button class="chaos-tool" data-tool="hammer">🔨 Hammer</button>
-          <button class="chaos-tool" data-tool="blaster">⚡ Blaster</button>
-          <button class="chaos-tool" data-tool="bomb">🧨 Small boom</button>
-          <button class="chaos-tool" data-tool="magnet">🧲 Magnet</button>
-          <button class="chaos-tool" data-tool="reset">🧹 Reset</button>
+      <div class="view tools-view hidden" id="toolsView">
+        <div class="tools-head">
+          <span class="tools-title">Beat Tools</span>
+          <button class="mini-btn" id="backClockBtn" type="button">Back</button>
         </div>
-        <button class="chaos-toggle" id="chaosToggle" title="Chaos tools" aria-label="Chaos tools"><span><span class="bar"></span><span class="bar"></span><span class="bar"></span></span></button>
+
+        <div class="tool-tabs">
+          <button class="tool-tab active" id="convertTab" type="button">Convert</button>
+          <button class="tool-tab" id="exploreTab" type="button">Explore</button>
+        </div>
+
+        <div class="tool-panel" id="convertPanel">
+          <div class="convert-grid">
+            <div class="convert-card wide">
+              <div class="convert-label">Trad time → @beat</div>
+              <div class="convert-row">
+                <input id="timeToBeatInput" type="time" value="12:00">
+                <select id="timeToBeatZone">
+                  <option value="local">Your timezone</option>
+                  <option value="UTC">UTC</option>
+                  <option value="America/New_York">New York</option>
+                  <option value="America/Chicago">Chicago</option>
+                  <option value="America/Los_Angeles">Los Angeles</option>
+                  <option value="Europe/London">London</option>
+                  <option value="Asia/Tokyo">Tokyo</option>
+                </select>
+              </div>
+              <div class="convert-result" id="timeToBeatResult">@000</div>
+            </div>
+
+            <div class="convert-card wide">
+              <div class="convert-label">@beat → trad time</div>
+              <div class="convert-row">
+                <input id="beatToTimeInput" type="number" min="0" max="999" value="500">
+                <select id="beatToTimeZone">
+                  <option value="local">Your timezone</option>
+                  <option value="UTC">UTC</option>
+                  <option value="America/New_York">New York</option>
+                  <option value="America/Chicago">Chicago</option>
+                  <option value="America/Los_Angeles">Los Angeles</option>
+                  <option value="Europe/London">London</option>
+                  <option value="Asia/Tokyo">Tokyo</option>
+                </select>
+              </div>
+              <div class="convert-result" id="beatToTimeResult">--:--</div>
+            </div>
+
+            <div class="convert-card">
+              <div class="convert-label">Minutes → beats</div>
+              <div class="convert-row"><input id="minToBeatInput" type="number" min="0" value="60"><span class="convert-label">min</span></div>
+              <div class="convert-result" id="minToBeatResult">≈ 42 beats</div>
+            </div>
+
+            <div class="convert-card">
+              <div class="convert-label">Beats → minutes</div>
+              <div class="convert-row"><input id="beatToMinInput" type="number" min="0" value="100"><span class="convert-label">beats</span></div>
+              <div class="convert-result" id="beatToMinResult">≈ 144 min</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tool-panel hidden" id="explorePanel">
+          <div class="explore-label" style="text-align:center;">Simulation</div>
+          <div class="explore-big" id="exploreBeatReadout">@500</div>
+          <div class="explore-scale"><span>@000</span><span>@250</span><span>@500</span><span>@750</span><span>@999</span></div>
+          <input class="beat-range" id="exploreBeatSlider" type="range" min="0" max="999" value="500">
+          <div class="zone-grid" id="zoneGrid">
+            <div class="zone-card"><span class="zone-name">Local</span><span class="zone-time" id="zoneLocal">--:--</span></div>
+            <div class="zone-card"><span class="zone-name">UTC</span><span class="zone-time" id="zoneUtc">--:--</span></div>
+            <div class="zone-card"><span class="zone-name">New York</span><span class="zone-time" id="zoneNy">--:--</span></div>
+            <div class="zone-card"><span class="zone-name">Chicago</span><span class="zone-time" id="zoneChi">--:--</span></div>
+            <div class="zone-card"><span class="zone-name">London</span><span class="zone-time" id="zoneLondon">--:--</span></div>
+            <div class="zone-card"><span class="zone-name">Tokyo</span><span class="zone-time" id="zoneTokyo">--:--</span></div>
+          </div>
+          <div class="tools-note">Drag @beat to explore matching world times</div>
+        </div>
       </div>
     </div>
-
   </div>
 
   <!-- Right panel: hour slider -->
@@ -749,6 +790,170 @@
     document.getElementById('footerDate').textContent = getInternetDate();
     updateCountdowns();
   }
+
+
+
+  // ---- Internal Beat Tools view ----
+  const clockView = document.getElementById('clockView');
+  const toolsView = document.getElementById('toolsView');
+  const openToolsBtn = document.getElementById('openToolsBtn');
+  const backClockBtn = document.getElementById('backClockBtn');
+  const convertTab = document.getElementById('convertTab');
+  const exploreTab = document.getElementById('exploreTab');
+  const convertPanel = document.getElementById('convertPanel');
+  const explorePanel = document.getElementById('explorePanel');
+
+  function setMainView(view) {
+    if (!clockView || !toolsView) return;
+    const showingTools = view === 'tools';
+    clockView.classList.toggle('hidden', showingTools);
+    toolsView.classList.toggle('hidden', !showingTools);
+    if (showingTools) {
+      syncToolsToCurrentBeat();
+      updateConverters();
+      updateExplore();
+    }
+  }
+
+  function setToolTab(tab) {
+    const explore = tab === 'explore';
+    convertTab.classList.toggle('active', !explore);
+    exploreTab.classList.toggle('active', explore);
+    convertPanel.classList.toggle('hidden', explore);
+    explorePanel.classList.toggle('hidden', !explore);
+    if (explore) updateExplore(); else updateConverters();
+  }
+
+  if (openToolsBtn) openToolsBtn.addEventListener('click', () => setMainView('tools'));
+  if (backClockBtn) backClockBtn.addEventListener('click', () => setMainView('clock'));
+  if (convertTab) convertTab.addEventListener('click', () => setToolTab('convert'));
+  if (exploreTab) exploreTab.addEventListener('click', () => setToolTab('explore'));
+
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function padBeat(n) { return String(Math.max(0, Math.min(999, Math.floor(Number(n) || 0)))).padStart(3, '0'); }
+  function normalizeBeat(n) { return ((Number(n) % 1000) + 1000) % 1000; }
+
+  function dateToBeat(date) {
+    const bmtMs = date.getTime() + 3600000;
+    const bmt = new Date(bmtMs);
+    const seconds = bmt.getUTCHours() * 3600 + bmt.getUTCMinutes() * 60 + bmt.getUTCSeconds() + bmt.getUTCMilliseconds() / 1000;
+    return normalizeBeat(seconds / 86.4);
+  }
+
+  function beatToDateToday(beat) {
+    const now = new Date();
+    const secondsUtc = normalizeBeat(beat) * 86.4 - 3600;
+    const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0);
+    return new Date(todayUtc + (((secondsUtc % 86400) + 86400) % 86400) * 1000);
+  }
+
+  function formatTimeInZone(date, zone) {
+    if (zone === 'local') {
+      let h = date.getHours();
+      const m = pad2(date.getMinutes());
+      const ap = h >= 12 ? 'p' : 'a';
+      h = h % 12 || 12;
+      return h + ':' + m + ap;
+    }
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: zone,
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    return formatter.format(date).replace(' AM','a').replace(' PM','p');
+  }
+
+  function getPartsInZone(date, zone) {
+    const dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone: zone,
+      year:'numeric', month:'2-digit', day:'2-digit',
+      hour:'2-digit', minute:'2-digit', second:'2-digit',
+      hour12:false
+    });
+    const parts = Object.fromEntries(dtf.formatToParts(date).filter(p => p.type !== 'literal').map(p => [p.type, p.value]));
+    return {
+      year: Number(parts.year), month: Number(parts.month), day: Number(parts.day),
+      hour: Number(parts.hour === '24' ? 0 : parts.hour), minute: Number(parts.minute), second: Number(parts.second)
+    };
+  }
+
+  function getOffsetMs(date, zone) {
+    const p = getPartsInZone(date, zone);
+    return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - date.getTime();
+  }
+
+  function zonedTimeToDateToday(timeValue, zone) {
+    const [h, m] = (timeValue || '00:00').split(':').map(Number);
+    const now = new Date();
+    if (zone === 'local') return new Date(now.getFullYear(), now.getMonth(), now.getDate(), h || 0, m || 0, 0, 0);
+    if (zone === 'UTC') return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), h || 0, m || 0, 0, 0));
+    const zNow = getPartsInZone(now, zone);
+    let utcMs = Date.UTC(zNow.year, zNow.month - 1, zNow.day, h || 0, m || 0, 0, 0);
+    for (let i = 0; i < 3; i++) utcMs = Date.UTC(zNow.year, zNow.month - 1, zNow.day, h || 0, m || 0, 0, 0) - getOffsetMs(new Date(utcMs), zone);
+    return new Date(utcMs);
+  }
+
+  function updateConverters() {
+    const timeInput = document.getElementById('timeToBeatInput');
+    const timeZone = document.getElementById('timeToBeatZone');
+    const timeResult = document.getElementById('timeToBeatResult');
+    const beatInput = document.getElementById('beatToTimeInput');
+    const beatZone = document.getElementById('beatToTimeZone');
+    const beatResult = document.getElementById('beatToTimeResult');
+    const minInput = document.getElementById('minToBeatInput');
+    const minResult = document.getElementById('minToBeatResult');
+    const beatMinInput = document.getElementById('beatToMinInput');
+    const beatMinResult = document.getElementById('beatToMinResult');
+    if (!timeInput) return;
+
+    const tDate = zonedTimeToDateToday(timeInput.value, timeZone.value);
+    timeResult.textContent = '@' + padBeat(dateToBeat(tDate));
+
+    const b = Math.max(0, Math.min(999, Number(beatInput.value) || 0));
+    beatInput.value = b;
+    beatResult.textContent = formatTimeInZone(beatToDateToday(b), beatZone.value);
+
+    const minutes = Math.max(0, Number(minInput.value) || 0);
+    minResult.innerHTML = '<span class="approx">≈</span> ' + Math.round(minutes / 1.44) + ' beats';
+
+    const beats = Math.max(0, Number(beatMinInput.value) || 0);
+    beatMinResult.innerHTML = '<span class="approx">≈</span> ' + Math.round(beats * 1.44) + ' min';
+  }
+
+  function updateExplore() {
+    const slider = document.getElementById('exploreBeatSlider');
+    if (!slider) return;
+    const beat = Math.max(0, Math.min(999, Number(slider.value) || 0));
+    document.getElementById('exploreBeatReadout').textContent = '@' + padBeat(beat);
+    const d = beatToDateToday(beat);
+    document.getElementById('zoneLocal').textContent = formatTimeInZone(d, 'local');
+    document.getElementById('zoneUtc').textContent = formatTimeInZone(d, 'UTC');
+    document.getElementById('zoneNy').textContent = formatTimeInZone(d, 'America/New_York');
+    document.getElementById('zoneChi').textContent = formatTimeInZone(d, 'America/Chicago');
+    document.getElementById('zoneLondon').textContent = formatTimeInZone(d, 'Europe/London');
+    document.getElementById('zoneTokyo').textContent = formatTimeInZone(d, 'Asia/Tokyo');
+  }
+
+  function syncToolsToCurrentBeat() {
+    const current = Math.floor(getBeats());
+    const beatToTimeInput = document.getElementById('beatToTimeInput');
+    const exploreBeatSlider = document.getElementById('exploreBeatSlider');
+    if (beatToTimeInput) beatToTimeInput.value = current;
+    if (exploreBeatSlider) exploreBeatSlider.value = current;
+  }
+
+  ['timeToBeatInput','timeToBeatZone','beatToTimeInput','beatToTimeZone','minToBeatInput','beatToMinInput'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateConverters);
+    if (el) el.addEventListener('change', updateConverters);
+  });
+  const exploreBeatSlider = document.getElementById('exploreBeatSlider');
+  if (exploreBeatSlider) exploreBeatSlider.addEventListener('input', updateExplore);
+
+  updateConverters();
+  updateExplore();
+
 
   // ---- FX Canvas ----
   const fxCanvas = document.getElementById('fxCanvas');
@@ -1111,681 +1316,7 @@
   setTimeout(matchPanelHeights, 800);
   window.addEventListener('resize', matchPanelHeights);
 
-
-
-  // ---- Chaos tool menu ----
-  const chaosCanvas = document.getElementById('chaosCanvas');
-  const chaosCtx = chaosCanvas.getContext('2d');
-  const chaosMenu = document.getElementById('chaosMenu');
-  const chaosToggle = document.getElementById('chaosToggle');
-  const chaosHint = document.getElementById('chaosHint');
-  const chaosToolButtons = [...document.querySelectorAll('.chaos-tool')];
-  let activeChaosTool = null;
-  let chaosParticles = [];
-  let chaosCracks = [];
-  let chaosAnimating = false;
-
-  function resizeChaosCanvas() {
-    chaosCanvas.width = outerEl.offsetWidth;
-    chaosCanvas.height = outerEl.offsetHeight;
-  }
-  resizeChaosCanvas();
-  setTimeout(resizeChaosCanvas, 500);
-  setTimeout(resizeChaosCanvas, 1500);
-  window.addEventListener('resize', resizeChaosCanvas);
-
-  chaosToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    chaosMenu.classList.toggle('open');
-    chaosToggle.classList.toggle('active', chaosMenu.classList.contains('open'));
-  });
-
-  function setChaosTool(tool) {
-    document.body.classList.remove('chaos-hammer','chaos-blaster','chaos-bomb','chaos-magnet');
-    chaosToolButtons.forEach(b => b.classList.remove('active'));
-
-    if (tool === 'reset') {
-      activeChaosTool = null;
-      chaosParticles = [];
-      chaosCracks = [];
-      chaosCtx.clearRect(0,0,chaosCanvas.width,chaosCanvas.height);
-      if (chaosHint) chaosHint.textContent = 'reset';
-      return;
-    }
-    if (tool === 'detonate') {
-      activeChaosTool = null;
-      chaosMenu.classList.remove('open');
-      chaosToggle.classList.remove('active');
-      detonate();
-      return;
-    }
-
-    activeChaosTool = tool;
-    const btn = chaosToolButtons.find(b => b.dataset.tool === tool);
-    if (btn) btn.classList.add('active');
-    document.body.classList.add('chaos-' + tool);
-    if (chaosHint) chaosHint.textContent = 'click widget';
-  }
-
-  chaosToolButtons.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      setChaosTool(btn.dataset.tool);
-    });
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!chaosMenu.contains(e.target) && chaosMenu.classList.contains('open')) {
-      chaosMenu.classList.remove('open');
-      chaosToggle.classList.remove('active');
-    }
-  });
-
-  function chaosPoint(evt) {
-    const r = outerEl.getBoundingClientRect();
-    return { x: evt.clientX - r.left, y: evt.clientY - r.top };
-  }
-
-  function shakeImpact(strength = 1) {
-    outerEl.classList.remove('impact-shake');
-    void outerEl.offsetWidth;
-    outerEl.style.setProperty('--impact-strength', strength);
-    outerEl.classList.add('impact-shake');
-    setTimeout(() => outerEl.classList.remove('impact-shake'), 280);
-  }
-
-  function addChunk(x, y, color, count, power) {
-    for (let i = 0; i < count; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const sp = power * (0.45 + Math.random());
-      const size = 2 + Math.random() * 7;
-      const sides = 3 + Math.floor(Math.random() * 4);
-      const pts = [];
-      for (let j = 0; j < sides; j++) {
-        const pa = (j / sides) * Math.PI * 2 + (Math.random() - 0.5) * 0.65;
-        const pr = size * (0.55 + Math.random() * 0.75);
-        pts.push({x: Math.cos(pa) * pr, y: Math.sin(pa) * pr});
-      }
-      chaosParticles.push({
-        kind:'chunk', x, y,
-        vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - Math.random()*3,
-        rot:Math.random()*Math.PI*2, rv:(Math.random()-0.5)*0.35,
-        pts, color, alpha:1, life:1,
-        gravity:0.18 + Math.random()*0.1
-      });
-    }
-  }
-
-  function addSparks(x, y, count, power) {
-    for (let i = 0; i < count; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const sp = power * (0.5 + Math.random());
-      chaosParticles.push({
-        kind:'spark', x, y,
-        vx:Math.cos(a)*sp, vy:Math.sin(a)*sp,
-        alpha:1, life:0.45 + Math.random()*0.45,
-        len:5 + Math.random()*13
-      });
-    }
-  }
-
-  function addSmoke(x, y, count, power) {
-    for (let i = 0; i < count; i++) {
-      chaosParticles.push({
-        kind:'smoke', x:x+(Math.random()-0.5)*10, y:y+(Math.random()-0.5)*10,
-        vx:(Math.random()-0.5)*power*0.18, vy:-0.35-Math.random()*0.8,
-        r:5 + Math.random()*12, grow:0.35 + Math.random()*0.45,
-        alpha:0.22 + Math.random()*0.12, life:1
-      });
-    }
-  }
-
-  function addRing(x, y, maxR, color) {
-    chaosParticles.push({ kind:'ring', x, y, r:2, maxR, color, alpha:0.9, life:1 });
-  }
-
-  function addCrack(x, y, arms, length, style = {}) {
-    const profile = {
-      jitter: style.jitter ?? 0.55,
-      branchChance: style.branchChance ?? 0.5,
-      branchScale: style.branchScale ?? 0.45,
-      coreColor: style.coreColor ?? 'rgba(2,8,18,0.98)',
-      glowColor: style.glowColor ?? 'rgba(255,220,120,0.55)',
-      highlightColor: style.highlightColor ?? 'rgba(255,245,190,0.35)',
-      coreWidth: style.coreWidth ?? 2.6,
-      glowWidth: style.glowWidth ?? 5.8,
-      highlightWidth: style.highlightWidth ?? 1.1,
-      alpha: style.alpha ?? 0.95,
-      life: style.life ?? 1.2
-    };
-
-    const lines = [];
-    for (let i = 0; i < arms; i++) {
-      let a = (i / arms) * Math.PI * 2 + (Math.random() - 0.5) * 0.9;
-      let px = x, py = y;
-      const segs = 3 + Math.floor(Math.random() * 3);
-      const pts = [{x:px, y:py}];
-      for (let s = 0; s < segs; s++) {
-        const step = length / segs * (0.7 + Math.random() * 0.6);
-        a += (Math.random() - 0.5) * profile.jitter;
-        px += Math.cos(a) * step;
-        py += Math.sin(a) * step;
-        pts.push({x:px, y:py});
-
-        if (s > 0 && Math.random() < profile.branchChance) {
-          const branchPts = [{x:px, y:py}];
-          let ba = a + ((Math.random() > 0.5 ? 1 : -1) * (0.35 + Math.random() * 0.6));
-          let bx = px, by = py;
-          const bSegs = 1 + Math.floor(Math.random() * 2);
-          for (let b = 0; b < bSegs; b++) {
-            const bStep = step * profile.branchScale * (0.75 + Math.random() * 0.45);
-            ba += (Math.random() - 0.5) * 0.45;
-            bx += Math.cos(ba) * bStep;
-            by += Math.sin(ba) * bStep;
-            branchPts.push({x:bx, y:by});
-          }
-          lines.push(branchPts);
-        }
-      }
-      lines.push(pts);
-    }
-    chaosCracks.push({ ...profile, lines, pulse:Math.random() * Math.PI * 2 });
-    if (chaosCracks.length > 18) chaosCracks.shift();
-  }
-
-  function addMagnetBits(x, y) {
-    for (let i = 0; i < 28; i++) {
-      const sx = Math.random()*chaosCanvas.width;
-      const sy = Math.random()*chaosCanvas.height;
-      chaosParticles.push({
-        kind:'magnet', x:sx, y:sy, tx:x, ty:y,
-        vx:(Math.random()-0.5)*2, vy:(Math.random()-0.5)*2,
-        r:2 + Math.random()*4,
-        color:Math.random() > 0.45 ? 'rgba(212,169,58,0.95)' : 'rgba(154,184,208,0.8)',
-        alpha:1, life:1, orbit:Math.random()*Math.PI*2
-      });
-    }
-  }
-
-  function runChaosTool(evt) {
-    if (!activeChaosTool || chaosMenu.contains(evt.target)) return;
-    if (!outerEl.contains(evt.target)) return;
-    evt.preventDefault();
-    resizeChaosCanvas();
-    const {x, y} = chaosPoint(evt);
-
-    if (activeChaosTool === 'hammer') {
-      shakeImpact(1.1);
-      addRing(x, y, 30, 'rgba(240,208,96,0.85)');
-      addCrack(x, y, 5 + Math.floor(Math.random()*2), 20 + Math.random()*18, {
-        coreColor:'rgba(3,10,20,0.98)',
-        glowColor:'rgba(255,223,128,0.68)',
-        highlightColor:'rgba(255,246,204,0.38)',
-        coreWidth:2.7,
-        glowWidth:6.4,
-        highlightWidth:1.15,
-        jitter:0.48,
-        branchChance:0.58,
-        branchScale:0.5,
-        life:1.45
-      });
-      addChunk(x, y, 'rgba(12,25,44,0.98)', 16, 5);
-      addSparks(x, y, 12, 7);
-    }
-    if (activeChaosTool === 'blaster') {
-      shakeImpact(0.7);
-      addRing(x, y, 22, 'rgba(255,160,55,0.9)');
-      addCrack(x, y, 3 + Math.floor(Math.random()*2), 12 + Math.random()*14, {
-        coreColor:'rgba(15,8,6,0.98)',
-        glowColor:'rgba(255,133,58,0.7)',
-        highlightColor:'rgba(255,214,170,0.3)',
-        coreWidth:2.1,
-        glowWidth:4.8,
-        highlightWidth:0.9,
-        jitter:0.68,
-        branchChance:0.38,
-        branchScale:0.38,
-        life:1.05
-      });
-      addSparks(x, y, 32, 10);
-      addSmoke(x, y, 7, 6);
-    }
-    if (activeChaosTool === 'bomb') {
-      shakeImpact(1.5);
-      addRing(x, y, 58, 'rgba(255,220,110,0.9)');
-      addCrack(x, y, 7 + Math.floor(Math.random()*3), 30 + Math.random()*28, {
-        coreColor:'rgba(2,8,18,0.98)',
-        glowColor:'rgba(255,236,146,0.82)',
-        highlightColor:'rgba(255,248,214,0.48)',
-        coreWidth:3.1,
-        glowWidth:7.2,
-        highlightWidth:1.35,
-        jitter:0.6,
-        branchChance:0.72,
-        branchScale:0.62,
-        life:1.7
-      });
-      addChunk(x, y, 'rgba(12,25,44,0.98)', 30, 8);
-      addChunk(x, y, 'rgba(212,169,58,0.9)', 18, 10);
-      addSparks(x, y, 54, 13);
-      addSmoke(x, y, 18, 8);
-    }
-    if (activeChaosTool === 'magnet') {
-      addRing(x, y, 42, 'rgba(154,184,208,0.65)');
-      addMagnetBits(x, y);
-    }
-
-    startChaosLoop();
-  }
-
-  outerEl.addEventListener('click', runChaosTool, true);
-
-  function drawChaos() {
-    chaosCtx.clearRect(0, 0, chaosCanvas.width, chaosCanvas.height);
-
-    chaosCracks.forEach(c => {
-      chaosCtx.save();
-      const pulseAlpha = Math.max(0.2, c.alpha * (0.92 + Math.sin(c.pulse += 0.08) * 0.08));
-      chaosCtx.globalAlpha = pulseAlpha;
-      c.lines.forEach(line => {
-        chaosCtx.beginPath();
-        line.forEach((pt, i) => i ? chaosCtx.lineTo(pt.x, pt.y) : chaosCtx.moveTo(pt.x, pt.y));
-        chaosCtx.strokeStyle = c.glowColor;
-        chaosCtx.lineWidth = c.glowWidth;
-        chaosCtx.lineCap = 'round';
-        chaosCtx.lineJoin = 'round';
-        chaosCtx.stroke();
-
-        chaosCtx.beginPath();
-        line.forEach((pt, i) => i ? chaosCtx.lineTo(pt.x, pt.y) : chaosCtx.moveTo(pt.x, pt.y));
-        chaosCtx.strokeStyle = c.coreColor;
-        chaosCtx.lineWidth = c.coreWidth;
-        chaosCtx.stroke();
-
-        chaosCtx.beginPath();
-        line.forEach((pt, i) => i ? chaosCtx.lineTo(pt.x, pt.y) : chaosCtx.moveTo(pt.x, pt.y));
-        chaosCtx.strokeStyle = c.highlightColor;
-        chaosCtx.lineWidth = c.highlightWidth;
-        chaosCtx.globalAlpha = pulseAlpha * 0.8;
-        chaosCtx.stroke();
-        chaosCtx.globalAlpha = pulseAlpha;
-      });
-      chaosCtx.restore();
-    });
-
-    chaosParticles.forEach(p => {
-      if (p.kind === 'chunk') {
-        p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.vx *= 0.985; p.vy *= 0.985; p.rot += p.rv; p.life -= 0.012; p.alpha = Math.max(0, p.life);
-        chaosCtx.save();
-        chaosCtx.translate(p.x, p.y); chaosCtx.rotate(p.rot); chaosCtx.globalAlpha = p.alpha;
-        chaosCtx.beginPath();
-        p.pts.forEach((pt, i) => i ? chaosCtx.lineTo(pt.x, pt.y) : chaosCtx.moveTo(pt.x, pt.y));
-        chaosCtx.closePath();
-        chaosCtx.fillStyle = p.color; chaosCtx.fill();
-        chaosCtx.strokeStyle = 'rgba(255,255,255,0.16)'; chaosCtx.lineWidth = 0.6; chaosCtx.stroke();
-        chaosCtx.restore();
-      }
-      if (p.kind === 'spark') {
-        p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.vx *= 0.98; p.vy *= 0.98; p.life -= 0.025; p.alpha = Math.max(0, p.life);
-        chaosCtx.strokeStyle = `rgba(255,218,95,${p.alpha})`;
-        chaosCtx.lineWidth = 1.1;
-        chaosCtx.beginPath();
-        chaosCtx.moveTo(p.x, p.y);
-        chaosCtx.lineTo(p.x - p.vx * 0.55, p.y - p.vy * 0.55);
-        chaosCtx.stroke();
-      }
-      if (p.kind === 'smoke') {
-        p.x += p.vx; p.y += p.vy; p.r += p.grow; p.life -= 0.01; p.alpha *= 0.985;
-        const g = chaosCtx.createRadialGradient(p.x,p.y,1,p.x,p.y,p.r);
-        g.addColorStop(0, `rgba(70,72,78,${p.alpha})`);
-        g.addColorStop(1, 'rgba(0,0,0,0)');
-        chaosCtx.fillStyle = g; chaosCtx.beginPath(); chaosCtx.arc(p.x,p.y,p.r,0,Math.PI*2); chaosCtx.fill();
-      }
-      if (p.kind === 'ring') {
-        p.r += (p.maxR - p.r) * 0.2; p.life -= 0.04; p.alpha = Math.max(0, p.life);
-        chaosCtx.strokeStyle = p.color.replace(/,0\.?\d+\)/, `,${p.alpha})`);
-        chaosCtx.lineWidth = 2;
-        chaosCtx.beginPath(); chaosCtx.arc(p.x,p.y,p.r,0,Math.PI*2); chaosCtx.stroke();
-      }
-      if (p.kind === 'magnet') {
-        const dx = p.tx - p.x, dy = p.ty - p.y;
-        p.vx += dx * 0.012; p.vy += dy * 0.012;
-        p.vx *= 0.88; p.vy *= 0.88;
-        p.orbit += 0.22;
-        p.x += p.vx + Math.cos(p.orbit) * 0.8;
-        p.y += p.vy + Math.sin(p.orbit) * 0.8;
-        p.life -= 0.012; p.alpha = Math.max(0, p.life);
-        chaosCtx.globalAlpha = p.alpha;
-        chaosCtx.fillStyle = p.color;
-        chaosCtx.beginPath(); chaosCtx.arc(p.x,p.y,p.r,0,Math.PI*2); chaosCtx.fill();
-        chaosCtx.globalAlpha = 1;
-      }
-    });
-
-    chaosParticles = chaosParticles.filter(p => (p.life ?? 0) > 0 && p.alpha > 0.01);
-    chaosCracks.forEach(c => {
-      c.life -= 0.0024;
-      c.alpha = Math.max(0.22, Math.min(1, c.life));
-    });
-    chaosCracks = chaosCracks.filter(c => c.life > -8);
-  }
-
-  function chaosLoop() {
-    drawChaos();
-    if (chaosParticles.length || chaosCracks.length) {
-      requestAnimationFrame(chaosLoop);
-    } else {
-      chaosAnimating = false;
-      chaosCtx.clearRect(0,0,chaosCanvas.width,chaosCanvas.height);
-    }
-  }
-
-  function startChaosLoop() {
-    if (chaosAnimating) return;
-    chaosAnimating = true;
-    requestAnimationFrame(chaosLoop);
-  }
-
-  // ---- Explosion effect ----
-  const detonateBtn  = document.getElementById('detonateBtn');
-  const explodeCount = document.getElementById('explodeCount');
-
-  let blastCount = parseInt(localStorage.getItem('gwBlastCount') || '0');
-  explodeCount.textContent = 'x' + blastCount;
-
-  function detonate() {
-    if (document.getElementById('explodeCanvas')) return;
-    detonateBtn.disabled = true;
-
-    // Increment and save count
-    blastCount++;
-    localStorage.setItem('gwBlastCount', blastCount);
-    explodeCount.textContent = 'x' + blastCount;
-
-    const rect = outerEl.getBoundingClientRect();
-    const W = Math.ceil(rect.width);
-    const H = Math.ceil(rect.height);
-    const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
-
-    const ec = document.createElement('canvas');
-    ec.id = 'explodeCanvas';
-    ec.width = Math.ceil(W * dpr);
-    ec.height = Math.ceil(H * dpr);
-    ec.style.cssText = `position:fixed;top:${rect.top}px;left:${rect.left}px;width:${W}px;height:${H}px;pointer-events:none;z-index:9999;`;
-    document.body.appendChild(ec);
-
-    const ectx = ec.getContext('2d');
-    ectx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    const originalVisibility = outerEl.style.visibility;
-    const originalFilter = outerEl.style.filter;
-    const originalTransform = outerEl.style.transform;
-
-    const centerX = W * 0.52;
-    const centerY = H * 0.58;
-    const gravity = 0.34;
-    const drag = 0.992;
-    const floor = H + 18;
-
-    function cssVar(name, fallback) {
-      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-      return v || fallback;
-    }
-
-    function pickElementColor(el) {
-      const cs = getComputedStyle(el);
-      if (cs.backgroundColor && cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && cs.backgroundColor !== 'transparent') return cs.backgroundColor;
-      if (cs.borderColor && cs.borderColor !== 'rgba(0, 0, 0, 0)' && cs.borderColor !== 'transparent') return cs.borderColor;
-      return cssVar('--card', '#0a1628');
-    }
-
-    function addJaggedPiece(list, x, y, w, h, color, weight = 1) {
-      const cx = x + w / 2;
-      const cy = y + h / 2;
-      const dx = cx - centerX;
-      const dy = cy - centerY;
-      const dist = Math.max(20, Math.hypot(dx, dy));
-      const blast = 8 + Math.random() * 8;
-      const lift = 7 + Math.random() * 8;
-      const sides = 3 + Math.floor(Math.random() * 4);
-      const radiusX = w * (0.45 + Math.random() * 0.25);
-      const radiusY = h * (0.45 + Math.random() * 0.25);
-      const pts = [];
-
-      for (let i = 0; i < sides; i++) {
-        const a = (i / sides) * Math.PI * 2 + (Math.random() - 0.5) * 0.7;
-        const spike = 0.55 + Math.random() * 0.65;
-        pts.push({ x: Math.cos(a) * radiusX * spike, y: Math.sin(a) * radiusY * spike });
-      }
-
-      list.push({
-        x: cx,
-        y: cy,
-        vx: (dx / dist) * blast + (Math.random() - 0.5) * 7,
-        vy: (dy / dist) * blast - lift - Math.random() * 5,
-        rot: Math.random() * Math.PI * 2,
-        rv: (Math.random() - 0.5) * (0.22 + Math.random() * 0.18),
-        pts,
-        color,
-        edge: Math.random() < 0.28 ? cssVar('--accent2', '#f0d060') : 'rgba(255,255,255,0.18)',
-        alpha: 1,
-        weight,
-        shadow: 8 + Math.random() * 14,
-        settled: false,
-        bounce: 0.18 + Math.random() * 0.14
-      });
-    }
-
-    const debris = [];
-    const targetEls = [
-      ...outerEl.querySelectorAll('.sidebar,.banner,.shell,.right-panel,.stat,.dial-wrap,.topbar,.footer,.countdown-item,.slider-wrap')
-    ];
-
-    targetEls.forEach(el => {
-      const r = el.getBoundingClientRect();
-      if (r.width < 4 || r.height < 4) return;
-      const x = r.left - rect.left;
-      const y = r.top - rect.top;
-      const color = pickElementColor(el);
-      const cell = el.classList.contains('shell') ? 22 : el.classList.contains('stat') ? 13 : 17;
-      const cols = Math.max(1, Math.ceil(r.width / cell));
-      const rows = Math.max(1, Math.ceil(r.height / cell));
-
-      for (let row = 0; row < rows; row++) {
-        for (let colIdx = 0; colIdx < cols; colIdx++) {
-          if (Math.random() < 0.07) continue;
-          const pw = r.width / cols;
-          const ph = r.height / rows;
-          addJaggedPiece(
-            debris,
-            x + colIdx * pw + Math.random() * 2,
-            y + row * ph + Math.random() * 2,
-            pw * (0.75 + Math.random() * 0.45),
-            ph * (0.75 + Math.random() * 0.45),
-            color,
-            0.8 + Math.random() * 0.9
-          );
-        }
-      }
-    });
-
-    // Extra metallic/gold fragments so the blast feels less like confetti and more like broken UI parts.
-    for (let i = 0; i < 46; i++) {
-      const size = 3 + Math.random() * 10;
-      addJaggedPiece(
-        debris,
-        centerX + (Math.random() - 0.5) * 70,
-        centerY + (Math.random() - 0.5) * 70,
-        size,
-        size * (0.55 + Math.random()),
-        Math.random() < 0.55 ? 'rgba(212,169,58,0.95)' : 'rgba(28,44,65,0.98)',
-        0.55
-      );
-    }
-
-    const sparks = Array.from({ length: 95 }, () => {
-      const a = Math.random() * Math.PI * 2;
-      const speed = 7 + Math.random() * 18;
-      return {
-        x: centerX + (Math.random() - 0.5) * 24,
-        y: centerY + (Math.random() - 0.5) * 18,
-        vx: Math.cos(a) * speed,
-        vy: Math.sin(a) * speed - Math.random() * 5,
-        life: 0.45 + Math.random() * 0.55,
-        decay: 0.012 + Math.random() * 0.018,
-        len: 6 + Math.random() * 16
-      };
-    });
-
-    const smoke = Array.from({ length: 42 }, () => ({
-      x: centerX + (Math.random() - 0.5) * 60,
-      y: centerY + (Math.random() - 0.5) * 35,
-      vx: (Math.random() - 0.5) * 1.8,
-      vy: -0.8 - Math.random() * 1.8,
-      r: 12 + Math.random() * 30,
-      grow: 0.45 + Math.random() * 0.7,
-      alpha: 0.22 + Math.random() * 0.18
-    }));
-
-    const start = performance.now();
-    const duration = 4200;
-    const hideAt = 120;
-    let hidden = false;
-
-    function drawFireball(t) {
-      const burst = Math.max(0, 1 - t / 0.32);
-      if (burst <= 0) return;
-
-      const grd = ectx.createRadialGradient(centerX, centerY, 4, centerX, centerY, 155 * (1 - burst * 0.1));
-      grd.addColorStop(0, `rgba(255,245,190,${0.95 * burst})`);
-      grd.addColorStop(0.22, `rgba(240,208,96,${0.72 * burst})`);
-      grd.addColorStop(0.55, `rgba(255,112,34,${0.48 * burst})`);
-      grd.addColorStop(1, 'rgba(10,10,10,0)');
-      ectx.fillStyle = grd;
-      ectx.beginPath();
-      ectx.arc(centerX, centerY, 160 * (1 - burst * 0.15), 0, Math.PI * 2);
-      ectx.fill();
-
-      ectx.strokeStyle = `rgba(245,225,140,${0.8 * burst})`;
-      ectx.lineWidth = 2 + 6 * burst;
-      ectx.beginPath();
-      ectx.arc(centerX, centerY, 60 + 210 * (1 - burst), 0, Math.PI * 2);
-      ectx.stroke();
-    }
-
-    function loop(now) {
-      const elapsed = now - start;
-      const t = Math.min(1, elapsed / duration);
-
-      if (!hidden && elapsed > hideAt) {
-        hidden = true;
-        outerEl.style.visibility = 'hidden';
-      } else if (!hidden) {
-        const shake = 1 - elapsed / hideAt;
-        outerEl.style.filter = `brightness(${1 + shake * 1.5})`;
-        outerEl.style.transform = `translate(${(Math.random() - 0.5) * 5 * shake}px, ${(Math.random() - 0.5) * 5 * shake}px)`;
-      }
-
-      ectx.clearRect(0, 0, W, H);
-      drawFireball(t);
-
-      smoke.forEach(s => {
-        s.x += s.vx;
-        s.y += s.vy;
-        s.r += s.grow;
-        s.alpha *= 0.987;
-        const grd = ectx.createRadialGradient(s.x, s.y, 1, s.x, s.y, s.r);
-        grd.addColorStop(0, `rgba(85,82,78,${s.alpha})`);
-        grd.addColorStop(0.65, `rgba(38,38,40,${s.alpha * 0.55})`);
-        grd.addColorStop(1, 'rgba(0,0,0,0)');
-        ectx.fillStyle = grd;
-        ectx.beginPath();
-        ectx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ectx.fill();
-      });
-
-      sparks.forEach(sp => {
-        if (sp.life <= 0) return;
-        sp.x += sp.vx;
-        sp.y += sp.vy;
-        sp.vy += gravity * 0.28;
-        sp.vx *= 0.985;
-        sp.vy *= 0.985;
-        sp.life -= sp.decay;
-        ectx.strokeStyle = `rgba(255,218,95,${Math.max(0, sp.life)})`;
-        ectx.lineWidth = 1.2;
-        ectx.beginPath();
-        ectx.moveTo(sp.x, sp.y);
-        ectx.lineTo(sp.x - sp.vx * 0.42, sp.y - sp.vy * 0.42);
-        ectx.stroke();
-      });
-
-      debris.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vx *= drag;
-        p.vy = p.vy * drag + gravity * p.weight;
-        p.rot += p.rv;
-
-        if (p.y > floor) {
-          p.y = floor;
-          p.vy *= -p.bounce;
-          p.vx *= 0.72;
-          p.rv *= 0.7;
-        }
-
-        if (t > 0.78) p.alpha = Math.max(0, 1 - (t - 0.78) / 0.22);
-
-        ectx.save();
-        ectx.translate(p.x, p.y);
-        ectx.rotate(p.rot);
-        ectx.globalAlpha = p.alpha;
-        ectx.shadowColor = 'rgba(0,0,0,0.55)';
-        ectx.shadowBlur = p.shadow;
-        ectx.beginPath();
-        p.pts.forEach((pt, i) => i ? ectx.lineTo(pt.x, pt.y) : ectx.moveTo(pt.x, pt.y));
-        ectx.closePath();
-        ectx.fillStyle = p.color;
-        ectx.fill();
-        ectx.shadowBlur = 0;
-        ectx.strokeStyle = p.edge;
-        ectx.lineWidth = 0.8;
-        ectx.stroke();
-
-        // Small highlight edge that gives pieces a thicker, broken-material look.
-        ectx.strokeStyle = 'rgba(255,255,255,0.14)';
-        ectx.lineWidth = 0.45;
-        ectx.beginPath();
-        if (p.pts.length > 1) {
-          ectx.moveTo(p.pts[0].x, p.pts[0].y);
-          ectx.lineTo(p.pts[1].x, p.pts[1].y);
-          ectx.stroke();
-        }
-        ectx.restore();
-      });
-
-      if (elapsed < duration) {
-        requestAnimationFrame(loop);
-      } else {
-        ec.remove();
-        outerEl.style.visibility = originalVisibility;
-        outerEl.style.filter = originalFilter;
-        outerEl.style.transform = originalTransform;
-        outerEl.style.opacity = '0';
-        outerEl.style.transition = 'opacity 0.65s ease';
-        requestAnimationFrame(() => { outerEl.style.opacity = '1'; });
-        setTimeout(() => {
-          outerEl.style.transition = '';
-          outerEl.style.opacity = '';
-          detonateBtn.disabled = false;
-        }, 700);
-      }
-    }
-
-    requestAnimationFrame(loop);
-  }
-
-  detonateBtn.addEventListener('click', detonate);
+  // game and explosion effects removed for this clean copy
 
   updateArcColors();
   startHintTimer();
