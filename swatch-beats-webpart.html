@@ -119,6 +119,8 @@
     border:1px solid var(--border);
     border-radius:4px;
     padding:10px 12px 10px;
+    box-sizing:border-box;
+    overflow:hidden;
   }
   .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
   .brand { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
@@ -266,10 +268,11 @@
   /* Internal Beats Tools view - SharePoint friendly, no popups */
   .view { display:block; }
   .view.hidden { display:none; }
+  .shell.locked-size .view { height:100%; min-height:0; }
   .mini-btn {
-    border:1px solid rgba(212,169,58,0.45);
+    border:1px solid rgba(212,169,58,0.52);
     border-radius:4px;
-    background:rgba(201,168,76,0.06);
+    background:rgba(201,168,76,0.08);
     color:var(--accent2);
     font-family:var(--mono);
     font-size:8px;
@@ -279,11 +282,32 @@
     cursor:pointer;
     line-height:1;
   }
-  .mini-btn:hover { border-color:var(--accent2); background:rgba(201,168,76,0.12); color:var(--text2); }
-  .tools-view { min-height:259px; }
-  .tools-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
-  .tools-title { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
-  .tool-tabs { display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:6px; }
+  .mini-btn:hover { border-color:var(--accent2); background:rgba(201,168,76,0.14); color:var(--text2); }
+  #backClockBtn {
+    font-size:9px;
+    font-weight:700;
+    letter-spacing:1.7px;
+    padding:6px 9px;
+    border-color:rgba(240,208,96,0.85);
+    background:linear-gradient(180deg, rgba(201,168,76,0.22), rgba(201,168,76,0.08));
+    color:#fff0a0;
+    box-shadow:0 0 10px rgba(212,169,58,0.22);
+  }
+  #backClockBtn:hover { background:rgba(201,168,76,0.22); color:var(--text2); box-shadow:0 0 14px rgba(212,169,58,0.34); }
+  .tools-view {
+    height:100%;
+    min-height:0;
+    width:100%;
+    max-width:100%;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    box-sizing:border-box;
+  }
+  .tools-view.hidden { display:none; }
+  .tools-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; flex-shrink:0; }
+  .tools-title { font-family:var(--mono); font-size:10px; letter-spacing:3px; color:var(--text2); text-transform:uppercase; }
+  .tool-tabs { display:grid; grid-template-columns:1fr 1fr; gap:4px; margin-bottom:5px; flex-shrink:0; }
   .tool-tab {
     border:1px solid var(--border);
     border-radius:3px;
@@ -297,59 +321,103 @@
     padding:5px 0;
     cursor:pointer;
   }
-  .tool-tab.active { color:var(--accent2); border-color:rgba(201,168,76,0.55); background:rgba(201,168,76,0.10); }
-  .tool-panel.hidden { display:none; }
-  .convert-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
-  .convert-card, .explore-card {
-    border:1px solid var(--border);
-    border-radius:3px;
-    background:rgba(201,168,76,0.035);
-    padding:6px;
-    min-width:0;
+  .tool-tab.active { color:var(--accent2); border-color:rgba(201,168,76,0.65); background:rgba(201,168,76,0.12); }
+  .tool-panel {
+    width:100%;
+    max-width:100%;
+    flex:1 1 auto;
+    min-height:0;
+    overflow:hidden;
+    border:1px solid rgba(30,48,72,0.95);
+    border-radius:4px;
+    background:rgba(7,16,32,0.36);
+    padding:5px;
+    box-sizing:border-box;
   }
+  .tool-panel.hidden { display:none; }
+  .convert-grid {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    grid-template-rows:minmax(0,.9fr) minmax(0,.9fr) minmax(0,.82fr);
+    gap:4px;
+    width:100%;
+    max-width:100%;
+    height:100%;
+    overflow:hidden;
+  }
+  .convert-card, .explore-card {
+    border:1px solid rgba(30,48,72,0.9);
+    border-radius:4px;
+    background:rgba(201,168,76,0.055);
+    padding:4px 5px;
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+    box-sizing:border-box;
+  }
+  .convert-card { display:flex; flex-direction:column; }
   .convert-card.wide { grid-column:1 / -1; }
   .convert-label, .explore-label {
     font-family:var(--mono);
-    font-size:7px;
-    letter-spacing:1px;
-    color:var(--muted);
+    font-size:7.5px;
+    letter-spacing:.75px;
+    color:#c7dded;
     text-transform:uppercase;
-    margin-bottom:4px;
+    margin-bottom:2px;
   }
-  .convert-row { display:flex; align-items:center; gap:5px; margin-bottom:5px; }
+  .convert-row {
+    display:grid;
+    grid-template-columns:minmax(70px,80px) minmax(0,1fr);
+    align-items:center;
+    gap:5px;
+    margin-bottom:3px;
+    width:100%;
+    max-width:100%;
+  }
+  .convert-card:not(.wide) .convert-row { grid-template-columns:minmax(0,1fr) auto; }
   .convert-row input, .convert-row select {
     width:100%;
     min-width:0;
-    border:1px solid var(--border);
+    max-width:100%;
+    border:1px solid rgba(154,184,208,0.34);
     border-radius:3px;
     background:#071020;
     color:var(--text2);
     font-family:var(--mono);
     font-size:10px;
-    padding:5px;
+    padding:3px 5px;
     outline:none;
+    height:22px;
   }
-  .convert-row input[type="number"] { max-width:76px; }
+  .convert-row select { font-size:8.5px; }
+  .convert-row input[type="time"] { width:78px; min-width:68px; }
+  .convert-row input[type="number"] { max-width:70px; }
+  .convert-card:not(.wide) .convert-row input[type="number"] { max-width:none; }
+  .convert-row input:focus, .convert-row select:focus { border-color:rgba(240,208,96,0.75); box-shadow:0 0 0 1px rgba(212,169,58,0.18); }
+  .convert-unit { font-size:7px; color:#c7dded; letter-spacing:.75px; white-space:nowrap; }
   .convert-result {
-    border-top:1px solid var(--border);
-    padding-top:5px;
+    border-top:1px solid rgba(154,184,208,0.22);
+    padding-top:3px;
+    margin-top:auto;
     font-family:var(--mono);
-    font-size:14px;
+    font-size:12.5px;
     color:var(--accent2);
-    line-height:1.1;
+    line-height:1.05;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
+    text-shadow:0 0 8px rgba(212,169,58,0.18);
   }
-  .convert-result .approx { color:var(--muted); font-size:10px; }
-  .explore-big { text-align:center; font-family:var(--mono); font-size:28px; color:var(--accent2); text-shadow:0 0 16px var(--glow); line-height:1; margin:4px 0 8px; }
+  .convert-card.wide .convert-result { font-size:13.5px; }
+  .convert-result .approx { color:#c7dded; font-size:9px; }
+  .explore-big { text-align:center; font-family:var(--mono); font-size:27px; color:var(--accent2); text-shadow:0 0 16px var(--glow); line-height:1; margin:2px 0 7px; }
   .explore-scale { display:flex; justify-content:space-between; font-family:var(--mono); font-size:7px; color:var(--muted); letter-spacing:1px; margin:0 2px 2px; }
   .beat-range { width:100%; accent-color:var(--accent2); margin:0 0 7px; }
   .zone-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
-  .zone-card { display:flex; align-items:center; justify-content:space-between; gap:6px; border:1px solid var(--border); border-radius:3px; background:rgba(201,168,76,0.04); padding:5px 6px; min-width:0; }
-  .zone-name { font-family:var(--display); font-size:10px; font-weight:700; letter-spacing:1px; color:var(--text2); text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .zone-time { font-family:var(--mono); font-size:13px; color:var(--accent2); white-space:nowrap; }
-  .tools-note { font-family:var(--mono); font-size:7px; letter-spacing:1px; color:var(--muted); text-align:center; margin-top:5px; text-transform:uppercase; opacity:.85; }
+  .zone-card { display:flex; align-items:center; justify-content:space-between; gap:5px; border:1px solid var(--border); border-radius:3px; background:rgba(201,168,76,0.04); padding:5px 6px; min-width:0; }
+  .zone-name { font-family:var(--display); font-size:8.5px; font-weight:700; letter-spacing:.55px; color:var(--text2); text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .zone-time { font-family:var(--mono); font-size:12.5px; color:var(--accent2); white-space:nowrap; }
+  .tools-note { font-family:var(--mono); font-size:6.5px; letter-spacing:.8px; color:var(--muted); text-align:center; margin-top:5px; text-transform:uppercase; opacity:.85; }
 
 </style>
 </head>
@@ -471,8 +539,8 @@
                 <select id="timeToBeatZone">
                   <option value="local">Your timezone</option>
                   <option value="UTC">UTC</option>
-                  <option value="America/New_York">New York</option>
-                  <option value="America/Chicago">Chicago</option>
+                  <option value="America/New_York">MD/NY</option>
+                  <option value="America/Chicago">MS/IL</option>
                   <option value="America/Los_Angeles">Los Angeles</option>
                   <option value="Europe/London">London</option>
                   <option value="Asia/Tokyo">Tokyo</option>
@@ -488,8 +556,8 @@
                 <select id="beatToTimeZone">
                   <option value="local">Your timezone</option>
                   <option value="UTC">UTC</option>
-                  <option value="America/New_York">New York</option>
-                  <option value="America/Chicago">Chicago</option>
+                  <option value="America/New_York">MD/NY</option>
+                  <option value="America/Chicago">MS/IL</option>
                   <option value="America/Los_Angeles">Los Angeles</option>
                   <option value="Europe/London">London</option>
                   <option value="Asia/Tokyo">Tokyo</option>
@@ -500,13 +568,13 @@
 
             <div class="convert-card">
               <div class="convert-label">Minutes → beats</div>
-              <div class="convert-row"><input id="minToBeatInput" type="number" min="0" value="60"><span class="convert-label">min</span></div>
+              <div class="convert-row"><input id="minToBeatInput" type="number" min="0" value="60"><span class="convert-unit">min</span></div>
               <div class="convert-result" id="minToBeatResult">≈ 42 beats</div>
             </div>
 
             <div class="convert-card">
               <div class="convert-label">Beats → minutes</div>
-              <div class="convert-row"><input id="beatToMinInput" type="number" min="0" value="100"><span class="convert-label">beats</span></div>
+              <div class="convert-row"><input id="beatToMinInput" type="number" min="0" value="100"><span class="convert-unit">beats</span></div>
               <div class="convert-result" id="beatToMinResult">≈ 144 min</div>
             </div>
           </div>
@@ -520,8 +588,8 @@
           <div class="zone-grid" id="zoneGrid">
             <div class="zone-card"><span class="zone-name">Local</span><span class="zone-time" id="zoneLocal">--:--</span></div>
             <div class="zone-card"><span class="zone-name">UTC</span><span class="zone-time" id="zoneUtc">--:--</span></div>
-            <div class="zone-card"><span class="zone-name">New York</span><span class="zone-time" id="zoneNy">--:--</span></div>
-            <div class="zone-card"><span class="zone-name">Chicago</span><span class="zone-time" id="zoneChi">--:--</span></div>
+            <div class="zone-card"><span class="zone-name" id="zoneNyName" title="Maryland / New York time">MD/NY ET</span><span class="zone-time" id="zoneNy">--:--</span></div>
+            <div class="zone-card"><span class="zone-name" id="zoneChiName" title="Mississippi / Illinois time">MS/IL CT</span><span class="zone-time" id="zoneChi">--:--</span></div>
             <div class="zone-card"><span class="zone-name">London</span><span class="zone-time" id="zoneLondon">--:--</span></div>
             <div class="zone-card"><span class="zone-name">Tokyo</span><span class="zone-time" id="zoneTokyo">--:--</span></div>
           </div>
@@ -798,10 +866,27 @@
   const exploreTab = document.getElementById('exploreTab');
   const convertPanel = document.getElementById('convertPanel');
   const explorePanel = document.getElementById('explorePanel');
+  const shellEl = document.querySelector('.shell');
+  let lockedShellHeight = 0;
+
+  function lockShellToClockSize() {
+    if (!shellEl || !clockView || clockView.classList.contains('hidden')) return;
+    shellEl.classList.remove('locked-size');
+    shellEl.style.height = '';
+    lockedShellHeight = Math.ceil(shellEl.offsetHeight);
+    shellEl.style.height = lockedShellHeight + 'px';
+    shellEl.classList.add('locked-size');
+  }
+
+  requestAnimationFrame(() => {
+    lockShellToClockSize();
+    if (typeof matchPanelHeights === 'function') matchPanelHeights();
+  });
 
   function setMainView(view) {
     if (!clockView || !toolsView) return;
     const showingTools = view === 'tools';
+    if (showingTools) lockShellToClockSize();
     clockView.classList.toggle('hidden', showingTools);
     toolsView.classList.toggle('hidden', !showingTools);
     if (showingTools) {
@@ -809,6 +894,8 @@
       updateConverters();
       updateExplore();
     }
+    requestAnimationFrame(matchPanelHeights);
+    setTimeout(matchPanelHeights, 120);
   }
 
   function setToolTab(tab) {
@@ -818,10 +905,17 @@
     convertPanel.classList.toggle('hidden', explore);
     explorePanel.classList.toggle('hidden', !explore);
     if (explore) updateExplore(); else updateConverters();
+    requestAnimationFrame(matchPanelHeights);
+    setTimeout(matchPanelHeights, 120);
   }
 
   if (openToolsBtn) openToolsBtn.addEventListener('click', () => setMainView('tools'));
   if (backClockBtn) backClockBtn.addEventListener('click', () => setMainView('clock'));
+  window.addEventListener('resize', () => {
+    if (clockView && !clockView.classList.contains('hidden')) {
+      setTimeout(() => { lockShellToClockSize(); if (typeof matchPanelHeights === 'function') matchPanelHeights(); }, 80);
+    }
+  });
   if (convertTab) convertTab.addEventListener('click', () => setToolTab('convert'));
   if (exploreTab) exploreTab.addEventListener('click', () => setToolTab('explore'));
 
@@ -890,6 +984,20 @@
     return new Date(utcMs);
   }
 
+  function getZoneAbbr(date, zone, fallback) {
+    try {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: zone,
+        timeZoneName: 'short',
+        hour: 'numeric'
+      }).formatToParts(date);
+      const abbr = parts.find(p => p.type === 'timeZoneName')?.value;
+      return abbr && /^[A-Z]{2,4}$/.test(abbr) ? abbr : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
   function updateConverters() {
     const timeInput = document.getElementById('timeToBeatInput');
     const timeZone = document.getElementById('timeToBeatZone');
@@ -925,6 +1033,10 @@
     const d = beatToDateToday(beat);
     document.getElementById('zoneLocal').textContent = formatTimeInZone(d, 'local');
     document.getElementById('zoneUtc').textContent = formatTimeInZone(d, 'UTC');
+    const nyName = document.getElementById('zoneNyName');
+    const chiName = document.getElementById('zoneChiName');
+    if (nyName) nyName.textContent = 'MD/NY ET';
+    if (chiName) chiName.textContent = 'MS/IL CT';
     document.getElementById('zoneNy').textContent = formatTimeInZone(d, 'America/New_York');
     document.getElementById('zoneChi').textContent = formatTimeInZone(d, 'America/Chicago');
     document.getElementById('zoneLondon').textContent = formatTimeInZone(d, 'Europe/London');
